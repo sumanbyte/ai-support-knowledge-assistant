@@ -5,13 +5,15 @@ import fs from "fs/promises";
 import { PDFParse } from "pdf-parse"
 import { ChunkingService } from '../chunking/chunking.service';
 import { EmbeddingsService } from '../embeddings/embeddings.service';
+import { VectorService } from '../vector/vector.service';
 
 @Injectable()
 export class DocumentsService {
 
   constructor(
     private readonly chunkingService: ChunkingService,
-    private readonly embeddingService: EmbeddingsService
+    private readonly embeddingService: EmbeddingsService,
+    private readonly vectorService: VectorService
   ) { }
 
   create(createDocumentDto: CreateDocumentDto) {
@@ -47,7 +49,9 @@ export class DocumentsService {
     //generate embeddings
     const embeddings = await this.embeddingService.generateEmbeddings(chunks);
 
-    console.log(embeddings)
+    const savedEmbeddings = await this.vectorService.saveVectorEmbeddings(chunks, embeddings);
+
+    console.log(savedEmbeddings)
 
     return "Document process initiated."
   }

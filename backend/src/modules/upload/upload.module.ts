@@ -9,11 +9,12 @@ import { DocumentsService } from '../documents/documents.service';
 import { ChunkingService } from '../chunking/chunking.service';
 import { EmbeddingsService } from '../embeddings/embeddings.service';
 import { AppConfig } from 'src/config/app.config';
+import { VectorService } from '../vector/vector.service';
 
 
 @Module({
   controllers: [UploadController],
-  providers: [UploadService, DocumentsService, ChunkingService, EmbeddingsService, AppConfig],
+  providers: [UploadService, DocumentsService, ChunkingService, EmbeddingsService, VectorService, AppConfig],
   imports: [
     MulterModule.register({
       storage: diskStorage({

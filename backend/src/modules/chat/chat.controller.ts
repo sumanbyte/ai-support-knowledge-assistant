@@ -5,7 +5,7 @@ import { UpdateChatDto } from './dto/update-chat.dto';
 
 @Controller('chat')
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(private readonly chatService: ChatService) { }
 
   @Post()
   create(@Body() createChatDto: CreateChatDto) {
@@ -30,5 +30,10 @@ export class ChatController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.chatService.remove(+id);
+  }
+
+  @Post("ask-assistant")
+  askAssistant(@Body("userQuestion") userQuestion: string) {
+    return this.chatService.askAssistant(userQuestion)
   }
 }

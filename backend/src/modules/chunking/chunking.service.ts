@@ -40,7 +40,6 @@ export class ChunkingService {
       start += chunkSize - overlap;
     }
 
-    console.log("Chunks: ", chunks)
 
     return chunks;
   }

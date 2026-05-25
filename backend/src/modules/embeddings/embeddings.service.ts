@@ -4,6 +4,7 @@ import { UpdateEmbeddingDto } from './dto/update-embedding.dto';
 import { GenerativeModel, GoogleGenerativeAI } from '@google/generative-ai';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from 'src/config/app.config';
+import { Index } from '@upstash/vector';
 
 @Injectable()
 export class EmbeddingsService {
@@ -15,6 +16,7 @@ export class EmbeddingsService {
   ) {
     this.genAI = new GoogleGenerativeAI(appConfig.getEnvConfig().GEMINI_API_KEY!);
     this.model = this.genAI.getGenerativeModel({ model: "gemini-embedding-001", });
+
   }
 
   create(createEmbeddingDto: CreateEmbeddingDto) {
@@ -46,10 +48,12 @@ export class EmbeddingsService {
           parts: [{
             text
           }]
-        }
-      }))
+        },
+        outputDimensionality: 1536  // ✅ Add this line!        
+      })),
     });
 
     return result.embeddings.map((e) => e.values);
   }
+
 }

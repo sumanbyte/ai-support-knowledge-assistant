@@ -6,4 +6,4 @@ import { RagController } from './rag.controller';
   controllers: [RagController],
   providers: [RagService],
 })
-export class RagModule {}
+export class RagModule { }
