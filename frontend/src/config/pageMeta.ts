@@ -49,5 +49,15 @@ export const PAGE_META: Record<PageType, PageMeta> = {
     sidebarVariant: 'rag',
     showNewChat: false,
   },
+  login: {
+    searchPlaceholder: '',
+    sidebarVariant: 'hub',
+    showNewChat: false,
+  },
+  signup: {
+    searchPlaceholder: '',
+    sidebarVariant: 'hub',
+    showNewChat: false,
+  },
 };
 

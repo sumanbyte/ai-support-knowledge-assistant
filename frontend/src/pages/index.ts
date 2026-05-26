@@ -6,3 +6,5 @@ export { IngestionPipeline } from './IngestionPipeline';
 export { AnalyticsPage } from './AnalyticsPage';
 export { SettingsPage } from './SettingsPage';
 export { ProfilePage } from './ProfilePage';
+export { LoginPage } from './LoginPage';
+export { SignupPage } from './SignupPage';

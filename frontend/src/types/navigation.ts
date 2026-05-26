@@ -1,4 +1,6 @@
 export type PageType =
+  | 'login'
+  | 'signup'
   | 'dashboard'
   | 'chat'
   | 'documents'

@@ -9,15 +9,21 @@ import {
   KnowledgeBase,
   ProfilePage,
   SettingsPage,
+  LoginPage,
+  SignupPage,
 } from './pages';
 import type { PageType } from './types/navigation';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>('dashboard');
+  const [currentPage, setCurrentPage] = useState<PageType>('login');
 
   const renderPage = () => {
     const navigate = setCurrentPage;
     switch (currentPage) {
+      case 'login':
+        return <LoginPage onNavigate={navigate} />;
+      case 'signup':
+        return <SignupPage onNavigate={navigate} />;
       case 'dashboard':
         return <EnterpriseHub onNavigate={navigate} />;
       case 'chat':
@@ -35,7 +41,7 @@ function App() {
       case 'profile':
         return <ProfilePage onNavigate={navigate} />;
       default:
-        return <EnterpriseHub onNavigate={navigate} />;
+        return <LoginPage onNavigate={navigate} />;
     }
   };
 

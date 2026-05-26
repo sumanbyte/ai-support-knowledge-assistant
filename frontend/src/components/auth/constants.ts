@@ -1,0 +1,2 @@
+export const CONVERSE_LOGO_URL =
+  'https://lh3.googleusercontent.com/aida/ADBb0ujh3rothhswJ1e-4WKVrHZ1Ac7peJDXkwGn5O2OVDnUgcEdX6NXUBED59qsevqoq3dMPlggwB0wWljqOs1CEfMTxzDlmZygMN1iQJCJLkiQ6Z2-9j8zlPStD9jMIKS1tBpxox1OoDhy8HUYmz8YANCEzDhaCAf5d3CDZdvO8nw3vTcR0-_ADFQiCTy0CSRZHw-Gwq60siZ2NUWG-la84upPc7MyozqsqH1WpC1kFJVkTsdc0h5gJRz3xA';
