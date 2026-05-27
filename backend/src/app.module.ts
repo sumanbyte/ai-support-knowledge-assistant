@@ -4,13 +4,15 @@ import { AppService } from './app.service';
 import { UploadModule } from './modules/upload/upload.module';
 import { ConfigModule } from '@nestjs/config';
 import { ChatModule } from './modules/chat/chat.module';
+import { UserModule } from './modules/user/user.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    UploadModule, ChatModule],
+    UploadModule, ChatModule, UserModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -5,9 +5,16 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { UserModule } from '../user/user.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [UserModule],
+  imports: [UserModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || "fallback",
+      signOptions: { expiresIn: parseInt(process.env.JWT_EXPIRES_IN || "3600") }
+    }),
+
+  ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, GoogleStrategy, JwtStrategy],
 })
