@@ -4,6 +4,7 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -36,7 +37,7 @@ export class AuthService {
       throw new ConflictException("Email already exists");
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
 
     return this.userService.create({
       email,
@@ -71,6 +72,7 @@ export class AuthService {
       user = await this.userService.create({
         email: googleUser.email,
         name: `${googleUser.firstName} ${googleUser.lastName}`,
+
         googleId: googleUser.id
       })
     } else if (!user.googleId) {
