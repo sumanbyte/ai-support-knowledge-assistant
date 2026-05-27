@@ -14,9 +14,10 @@ export class UserService {
       data: {
         email: createUserDto.email,
         name: createUserDto.name,
-        password: createUserDto.password
-      }
-    })
+        password: createUserDto.password,
+        googleId: createUserDto.googleId,
+      },
+    });
   }
 
   findAll() {

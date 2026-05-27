@@ -1,10 +1,11 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UserService } from '../user/user.service';
-import { CreateUserDto } from '../user/dto/create-user.dto';
+import { SignupDto } from './dto/signup.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -29,22 +30,22 @@ export class AuthService {
     return `This action removes a #${id} auth`;
   }
 
-  async register(createUserDto: CreateUserDto) {
-    const { email, name, password } = createUserDto;
-    const user = await this.userService.findByEmail(createUserDto.email);
+  async register(signupDto: SignupDto) {
+    const { email, name, password } = signupDto;
+
+    const user = await this.userService.findByEmail(email);
 
     if (user) {
       throw new ConflictException("Email already exists");
     }
 
-    const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     return this.userService.create({
       email,
       name,
-      password: hashedPassword
-    })
-
+      password: hashedPassword,
+    });
   }
 
   // 2. Validate Local User for Sign In
@@ -79,11 +80,11 @@ export class AuthService {
       user = await this.userService.updateGoogleId(user.id, googleUser.googleId);
     }
 
-    return this.login(user)
+    return this.generateToken(user)
   }
 
 
-  async login(user: any) {
+  async generateToken(user: any) {
     const payload = { email: user.email, sub: user.id };
 
     return {
@@ -94,6 +95,18 @@ export class AuthService {
         name: user.name,
       }
     }
+  }
+
+  async refreshToken(req: Request) {
+  }
+
+  async login(loginDto: LoginDto) {
+
+    const user = await this.validateUser(loginDto.email, loginDto.password);
+    if (!user) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
+    return this.generateToken(user);
   }
 
 }

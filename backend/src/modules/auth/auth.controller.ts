@@ -1,25 +1,27 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { CreateUserDto } from '../user/dto/create-user.dto';
+import { SignupDto } from './dto/signup.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '../user/entities/user.entity';
+import { JwtAuthGuard } from './guards/jwt-auth-guard';
+import { GetUser } from './decorators/current-user.decorator';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   @Post("signup")
-  signup(@Body() createUserDto: CreateUserDto) {
-    return this.authService.register(createUserDto);
+  signup(@Body() signupDto: SignupDto) {
+    return this.authService.register(signupDto);
   }
 
   //Local Sign In
   @UseGuards(AuthGuard("local"))
   @Post("login")
-  async login(@Req() req: any) {
-    return this.authService.login(req.user as User);
+  async login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
   }
 
   // Initiates google oauth redirection 
@@ -35,6 +37,18 @@ export class AuthController {
   async googleAuthRedirect(@Req() req, @Res() res) {
     const result = await this.authService.validateGoogleUser(req.user);
     return res.status(200).json(result);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("me")
+  getMe(@GetUser() user: any) {
+    return user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("refresh")
+  refreshToken(@Req() req) {
+    return this.authService.refreshToken(req);
   }
 
   @Get()

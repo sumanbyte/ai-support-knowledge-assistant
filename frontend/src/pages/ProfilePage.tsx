@@ -3,21 +3,16 @@ import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
-import type { PageType } from '../types/navigation';
+import { useAppNavigate } from '../hooks/useAppNavigate';
 
-interface ProfilePageProps {
-  onNavigate?: (page: PageType) => void;
-}
-
-export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
+export const ProfilePage: React.FC = () => {
+  const navigate = useAppNavigate();
   const [name, setName] = useState('Alex Chen');
   const [email, setEmail] = useState('alex.chen@acme.com');
   const [notifications, setNotifications] = useState(true);
 
   return (
     <AppShell
-      currentPage="profile"
-      onNavigate={(p) => onNavigate?.(p)}
       header={
         <PageHeader
           title="User Profile & Preferences"
@@ -25,7 +20,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
           actions={
             <button
               type="button"
-              onClick={() => onNavigate?.('dashboard')}
+              onClick={() => navigate('dashboard')}
               className="glass-panel px-4 py-2 rounded text-sm text-on-surface hover:text-primary transition-smooth"
             >
               ← Dashboard
@@ -103,7 +98,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
           </button>
           <button
             type="button"
-            onClick={() => onNavigate?.('settings')}
+            onClick={() => navigate('settings')}
             className="glass-panel px-5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary transition-smooth"
           >
             Workspace settings

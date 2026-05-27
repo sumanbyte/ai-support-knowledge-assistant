@@ -1,35 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AuthDivider } from '../components/auth/AuthDivider';
 import { AuthField } from '../components/auth/AuthField';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { CONVERSE_LOGO_URL } from '../components/auth/constants';
 import { GoogleIcon } from '../components/auth/GoogleIcon';
+import { toast } from '../components/toast';
 import { Icon } from '../components/UI/Icon';
-import type { PageType } from '../types/navigation';
+import { authService } from '../services/authService';
+import { useApi } from '../hooks/useApi';
+import { useError } from '../hooks/useError';
+import { useAppNavigate } from '../hooks/useAppNavigate';
 
-interface LoginPageProps {
-  onNavigate: (page: PageType) => void;
-}
-
-export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
+export const LoginPage: React.FC = () => {
+  const navigate = useAppNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+
+  const { data, error, loading, execute } = useApi(authService.login);
+
+  useError(error);
+
+  useEffect(() => {
+    if (!data) return;
+    toast.success('Welcome back.', {
+      description: 'Redirecting to Mission Control.',
+    });
+    navigate('dashboard');
+  }, [data, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      onNavigate('dashboard');
-    } catch {
-      setError('Failed to sign in. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
+    execute({ email, password });
+
   };
 
   return (
@@ -46,12 +49,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
       </div>
 
       <div className="auth-glass-card-login auth-card-glow rounded-xl p-10 shadow-2xl">
-        {error && (
-          <div className="mb-4 rounded-lg border border-error/50 bg-error/20 p-4">
-            <p className="text-body-md text-error">{error}</p>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-6">
           <AuthField
             id="email"
@@ -135,7 +132,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
         Don&apos;t have an account?{' '}
         <button
           type="button"
-          onClick={() => onNavigate('signup')}
+          onClick={() => navigate('signup')}
           className="ml-1 font-semibold text-primary transition-all hover:underline"
         >
           Sign up

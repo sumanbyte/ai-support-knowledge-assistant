@@ -3,21 +3,13 @@ import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
-import type { PageType } from '../types/navigation';
-
-interface SettingsPageProps {
-  onNavigate?: (page: PageType) => void;
-}
-
-export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate }) => {
+export const SettingsPage: React.FC = () => {
   const [workspaceName, setWorkspaceName] = useState('Acme Corp Enterprise');
   const [ragEnabled, setRagEnabled] = useState(true);
   const [streamingEnabled, setStreamingEnabled] = useState(true);
 
   return (
     <AppShell
-      currentPage="settings"
-      onNavigate={(p) => onNavigate?.(p)}
       header={
         <PageHeader
           title="Workspace Settings & Administration"

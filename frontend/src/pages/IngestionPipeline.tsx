@@ -3,8 +3,6 @@ import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
-import type { PageType } from '../types/navigation';
-
 const ACTIVE_TASKS = [
   {
     id: '1',
@@ -28,15 +26,9 @@ const ACTIVE_TASKS = [
 
 const STAGES = ['EXTRACTION', 'CHUNKING', 'EMBEDDING', 'STORAGE'];
 
-interface IngestionPipelineProps {
-  onNavigate?: (page: PageType) => void;
-}
-
-export const IngestionPipeline: React.FC<IngestionPipelineProps> = ({ onNavigate }) => {
+export const IngestionPipeline: React.FC = () => {
   return (
     <AppShell
-      currentPage="ingestion"
-      onNavigate={(p) => onNavigate?.(p)}
       header={
         <PageHeader
           title="Ingestion Pipeline"

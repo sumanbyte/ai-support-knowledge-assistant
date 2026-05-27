@@ -1,14 +1,15 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { MAIN_NAV } from '../../config/navigation';
+import { pageFromPathname } from '../../config/paths';
 import { PAGE_META } from '../../config/pageMeta';
+import { useAppNavigate } from '../../hooks/useAppNavigate';
 import type { PageType } from '../../types/navigation';
 import { Icon } from '../UI/Icon';
 import { Sidebar } from './Sidebar';
 import { TopNavBar } from './TopNavBar';
 
 interface AppShellProps {
-  currentPage: PageType;
-  onNavigate: (page: PageType) => void;
   children: React.ReactNode;
   bare?: boolean;
   hideTopNav?: boolean;
@@ -16,13 +17,14 @@ interface AppShellProps {
 }
 
 export const AppShell: React.FC<AppShellProps> = ({
-  currentPage,
-  onNavigate,
   children,
   bare = false,
   hideTopNav = false,
   header,
 }) => {
+  const location = useLocation();
+  const navigate = useAppNavigate();
+  const currentPage = pageFromPathname(location.pathname);
   const meta = PAGE_META[currentPage];
   const sidebarItems = MAIN_NAV.map((item) => ({
     id: item.id,
@@ -31,6 +33,8 @@ export const AppShell: React.FC<AppShellProps> = ({
     active: item.id === currentPage,
   }));
 
+  const go = (page: PageType) => navigate(page);
+
   return (
     <div className="relative min-h-screen selection-primary bg-background">
       <div className="app-ambient" aria-hidden />
@@ -38,17 +42,17 @@ export const AppShell: React.FC<AppShellProps> = ({
         items={sidebarItems}
         variant={meta.sidebarVariant}
         showNewChat={meta.showNewChat}
-        onItemClick={(id) => onNavigate(id as PageType)}
-        onNewChat={() => onNavigate('chat')}
-        onProfileClick={() => onNavigate('profile')}
-        onSettingsClick={() => onNavigate('settings')}
+        onItemClick={(id) => go(id as PageType)}
+        onNewChat={() => go('chat')}
+        onProfileClick={() => go('profile')}
+        onSettingsClick={() => go('settings')}
       />
       {!hideTopNav && (
         <TopNavBar
           searchPlaceholder={meta.searchPlaceholder}
-          onProfileClick={() => onNavigate('profile')}
+          onProfileClick={() => go('profile')}
           showNewChat={meta.showNewChat && currentPage !== 'chat'}
-          onNewChat={() => onNavigate('chat')}
+          onNewChat={() => go('chat')}
         />
       )}
 
@@ -75,7 +79,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           <button
             key={item.id}
             type="button"
-            onClick={() => onNavigate(item.id)}
+            onClick={() => go(item.id)}
             className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg ${
               currentPage === item.id ? 'text-primary' : 'text-on-surface-variant'
             }`}

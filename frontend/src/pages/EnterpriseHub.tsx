@@ -7,19 +7,13 @@ import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
 import { RECENT_CHATS } from '../data/mockData';
-import type { PageType } from '../types/navigation';
+import { useAppNavigate } from '../hooks/useAppNavigate';
 
-interface EnterpriseHubProps {
-  onNavigate?: (page: PageType) => void;
-}
-
-export const EnterpriseHub: React.FC<EnterpriseHubProps> = ({ onNavigate }) => {
-  const go = (p: PageType) => onNavigate?.(p);
+export const EnterpriseHub: React.FC = () => {
+  const go = useAppNavigate();
 
   return (
     <AppShell
-      currentPage="dashboard"
-      onNavigate={(p) => onNavigate?.(p)}
       header={
         <PageHeader
           title="Mission Control"

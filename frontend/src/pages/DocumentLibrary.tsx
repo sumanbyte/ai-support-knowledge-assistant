@@ -4,16 +4,10 @@ import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
 import { DEMO_DOCUMENTS } from '../data/mockData';
-import type { PageType } from '../types/navigation';
-
 type DocStatus = 'indexed' | 'processing' | 'error';
 type ViewMode = 'grid' | 'list';
 
-interface DocumentLibraryProps {
-  onNavigate?: (page: PageType) => void;
-}
-
-export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ onNavigate }) => {
+export const DocumentLibrary: React.FC = () => {
   const [documents, setDocuments] = useState(DEMO_DOCUMENTS);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -93,8 +87,6 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({ onNavigate }) 
 
   return (
     <AppShell
-      currentPage="documents"
-      onNavigate={(p) => onNavigate?.(p)}
       header={
         <PageHeader
           title="Document Library"

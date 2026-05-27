@@ -5,12 +5,6 @@ import { RagSourcePanel } from '../components/chat/RagSourcePanel';
 import { AppShell } from '../components/Layout';
 import { Icon } from '../components/UI/Icon';
 import { CHAT_SUGGESTIONS, SEED_CHAT_MESSAGES } from '../data/mockData';
-import type { PageType } from '../types/navigation';
-
-interface ChatPageProps {
-  onNavigate?: (page: PageType) => void;
-}
-
 async function fetchAssistantReply(question: string): Promise<string | null> {
   try {
     const res = await fetch('http://localhost:3000/chat/ask-assistant', {
@@ -30,7 +24,7 @@ async function fetchAssistantReply(question: string): Promise<string | null> {
   }
 }
 
-export const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
+export const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMsg[]>(SEED_CHAT_MESSAGES);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -91,7 +85,7 @@ export const ChatPage: React.FC<ChatPageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <AppShell currentPage="chat" onNavigate={(p) => onNavigate?.(p)} bare hideTopNav>
+    <AppShell bare hideTopNav>
       <div className="flex flex-1 min-h-0 h-full overflow-hidden">
         {/* Main chat column */}
         <div className="flex-1 flex flex-col min-w-0 bg-background">

@@ -3,7 +3,7 @@ import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
-import type { PageType } from '../types/navigation';
+import { useAppNavigate } from '../hooks/useAppNavigate';
 
 const ENTRIES = [
   { id: '1', title: 'API Authentication Overview', category: 'API Reference', chunks: 12, updated: 'May 24', score: 94 },
@@ -15,11 +15,8 @@ const ENTRIES = [
 
 const CATEGORIES = ['All', 'API Reference', 'Architecture', 'ML/AI', 'Administration'];
 
-interface KnowledgeBaseProps {
-  onNavigate?: (page: PageType) => void;
-}
-
-export const KnowledgeBase: React.FC<KnowledgeBaseProps> = ({ onNavigate }) => {
+export const KnowledgeBase: React.FC = () => {
+  const navigate = useAppNavigate();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -37,8 +34,6 @@ export const KnowledgeBase: React.FC<KnowledgeBaseProps> = ({ onNavigate }) => {
 
   return (
     <AppShell
-      currentPage="knowledge-base"
-      onNavigate={(p) => onNavigate?.(p)}
       header={
         <PageHeader
           title="Knowledge Base & Document Processing"
@@ -142,7 +137,7 @@ export const KnowledgeBase: React.FC<KnowledgeBaseProps> = ({ onNavigate }) => {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onNavigate?.('chat');
+                      navigate('chat');
                     }}
                     className="bg-primary/10 text-primary px-3 py-1.5 rounded text-sm font-medium hover:bg-primary/20 flex items-center gap-1"
                   >

@@ -1,42 +1,51 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AuthDivider } from '../components/auth/AuthDivider';
 import { AuthField } from '../components/auth/AuthField';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { CONVERSE_LOGO_URL } from '../components/auth/constants';
 import { SsoIcon } from '../components/auth/SsoIcon';
+import { toast } from '../components/toast';
 import { Icon } from '../components/UI/Icon';
-import type { PageType } from '../types/navigation';
+import { authService } from '../services/authService';
+import { useApi } from '../hooks/useApi';
+import { isAxiosError } from 'axios';
+import { useAppNavigate } from '../hooks/useAppNavigate';
 
-interface SignupPageProps {
-  onNavigate: (page: PageType) => void;
-}
-
-export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
+export const SignupPage: React.FC = () => {
+  const navigate = useAppNavigate();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+
+  const { data, error, loading, execute } = useApi(authService.signup);
+
+  useEffect(() => {
+    if (!data) return;
+    toast.success('Account created successfully.', {
+      description: 'You can now sign in with your credentials.',
+    });
+    navigate('login');
+  }, [data, navigate]);
+
+  useEffect(() => {
+    if (!error) return;
+    const fallback = 'Unable to create your account. Please try again.';
+    const message = isAxiosError(error)
+      ? ((error.response?.data as { message?: string } | undefined)?.message ?? fallback)
+      : fallback;
+    toast.error(message, { title: 'Signup failed' });
+  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-
     if (!agreeToTerms) {
-      setError('Please agree to the Terms of Service and Privacy Policy.');
+      toast.error('Please agree to the Terms of Service and Privacy Policy.', {
+        title: 'Terms required',
+      });
       return;
     }
-
-    setLoading(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      onNavigate('dashboard');
-    } catch {
-      setError('Failed to create account. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    execute({ name: fullName, email, password });
   };
 
   return (
@@ -64,12 +73,6 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
             Start building your enterprise knowledge base.
           </p>
         </header>
-
-        {error && (
-          <div className="rounded-lg border border-error/50 bg-error/20 p-4">
-            <p className="text-body-md text-error">{error}</p>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <AuthField
@@ -156,7 +159,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
             Already have an account?{' '}
             <button
               type="button"
-              onClick={() => onNavigate('login')}
+              onClick={() => navigate('login')}
               className="font-semibold text-primary transition-all hover:underline"
             >
               Log in

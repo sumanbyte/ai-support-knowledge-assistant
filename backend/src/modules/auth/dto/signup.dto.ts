@@ -1,13 +1,12 @@
 import {
     IsEmail,
     IsNotEmpty,
-    IsOptional,
     IsString,
     MaxLength,
     MinLength,
 } from 'class-validator';
 
-export class CreateUserDto {
+export class SignupDto {
     @IsEmail()
     @IsNotEmpty()
     email: string;
@@ -16,13 +15,9 @@ export class CreateUserDto {
     @IsNotEmpty()
     name: string;
 
-    @IsOptional()
     @IsString()
+    @IsNotEmpty()
     @MinLength(8)
     @MaxLength(16)
-    password?: string;
-
-    @IsOptional()
-    @IsString()
-    googleId?: string;
+    password: string;
 }

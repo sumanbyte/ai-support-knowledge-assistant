@@ -3,12 +3,6 @@ import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
-import type { PageType } from '../types/navigation';
-
-interface AnalyticsPageProps {
-  onNavigate?: (page: PageType) => void;
-}
-
 const METRICS = [
   { label: 'Total Queries', value: '142.5k', change: '+8.2%', icon: 'query_stats', up: true },
   { label: 'Tokens Processed', value: '3.8M', change: '+12%', icon: 'token', up: true },
@@ -18,14 +12,12 @@ const METRICS = [
 
 const CHART_POINTS = '0,80 40,65 80,72 120,45 160,55 200,30 240,40 280,20 320,35 360,15 400,25';
 
-export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ onNavigate }) => {
+export const AnalyticsPage: React.FC = () => {
   const [range, setRange] = useState<'7d' | '30d' | '90d'>('7d');
   const bars = [65, 82, 45, 90, 72, 88, 95, 70, 85, 60, 78, 92];
 
   return (
     <AppShell
-      currentPage="analytics"
-      onNavigate={(p) => onNavigate?.(p)}
       header={
         <PageHeader
           title="System Performance"

@@ -1,51 +1,8 @@
-import './App.css'
-import { useState } from 'react';
-import {
-  AnalyticsPage,
-  ChatPage,
-  DocumentLibrary,
-  EnterpriseHub,
-  IngestionPipeline,
-  KnowledgeBase,
-  ProfilePage,
-  SettingsPage,
-  LoginPage,
-  SignupPage,
-} from './pages';
-import type { PageType } from './types/navigation';
+import './App.css';
+import { Outlet } from 'react-router-dom';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>('login');
-
-  const renderPage = () => {
-    const navigate = setCurrentPage;
-    switch (currentPage) {
-      case 'login':
-        return <LoginPage onNavigate={navigate} />;
-      case 'signup':
-        return <SignupPage onNavigate={navigate} />;
-      case 'dashboard':
-        return <EnterpriseHub onNavigate={navigate} />;
-      case 'chat':
-        return <ChatPage onNavigate={navigate} />;
-      case 'documents':
-        return <DocumentLibrary onNavigate={navigate} />;
-      case 'knowledge-base':
-        return <KnowledgeBase onNavigate={navigate} />;
-      case 'ingestion':
-        return <IngestionPipeline onNavigate={navigate} />;
-      case 'analytics':
-        return <AnalyticsPage onNavigate={navigate} />;
-      case 'settings':
-        return <SettingsPage onNavigate={navigate} />;
-      case 'profile':
-        return <ProfilePage onNavigate={navigate} />;
-      default:
-        return <LoginPage onNavigate={navigate} />;
-    }
-  };
-
-  return renderPage();
+  return <Outlet />;
 }
 
 export default App;
