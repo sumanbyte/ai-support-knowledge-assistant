@@ -100,6 +100,14 @@ export class AuthController {
     return this.authService.refreshToken(req, res);
   }
 
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Clear auth cookies and sign out' })
+  @ApiOkResponse({ description: 'Logged out' })
+  logout(@Res({ passthrough: true }) res: Response) {
+    return this.authService.logout(res);
+  }
+
   @Get()
   findAll() {
     return this.authService.findAll();

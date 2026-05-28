@@ -15,4 +15,7 @@ export const authService = {
 
   getCurrentUser: (): Promise<AuthUserDto> =>
     axiosInstance.get('/auth/me') as Promise<AuthUserDto>,
+
+  logout: (): Promise<{ ok: boolean }> =>
+    axiosInstance.post('/auth/logout') as Promise<{ ok: boolean }>,
 };

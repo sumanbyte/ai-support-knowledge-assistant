@@ -20,6 +20,15 @@ export class AppConfig {
         return (this.configService.get<string>("JWT_REFRESH_EXPIRES_IN") ?? "7d") as JwtSignOptions["expiresIn"];
     }
 
+    get cloudinary() {
+        return {
+            cloudName: this.configService.get<string>("CLOUDINARY_CLOUD_NAME") ?? "",
+            apiKey: this.configService.get<string>("CLOUDINARY_API_KEY") ?? "",
+            apiSecret: this.configService.get<string>("CLOUDINARY_API_SECRET") ?? "",
+            folder: this.configService.get<string>("CLOUDINARY_FOLDER") ?? "converse-documents",
+        };
+    }
+
     getEnvConfig() {
         const GEMINI_API_KEY = this.configService.get<string>("GEMINI_API_KEY");
         const UPSTASH_VECTOR_REST_URL = this.configService.get<string>("UPSTASH_VECTOR_REST_URL")

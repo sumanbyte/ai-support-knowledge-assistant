@@ -46,6 +46,9 @@ lerna-debug.log*
 .temp
 .tmp
 
+# Local uploads (legacy — files now stored in Cloudinary)
+/uploads
+
 # Runtime data
 pids
 *.pid

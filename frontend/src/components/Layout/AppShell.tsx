@@ -40,10 +40,7 @@ export const AppShell: React.FC<AppShellProps> = ({
       <div className="app-ambient" aria-hidden />
       <Sidebar
         items={sidebarItems}
-        variant={meta.sidebarVariant}
-        showNewChat={meta.showNewChat}
         onItemClick={(id) => go(id as PageType)}
-        onNewChat={() => go('chat')}
         onProfileClick={() => go('profile')}
         onSettingsClick={() => go('settings')}
       />

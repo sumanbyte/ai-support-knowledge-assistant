@@ -178,4 +178,12 @@ export class AuthService {
     return { user: safeUser };
   }
 
+  logout(res: Response) {
+    const accessOpts = this.appConfig.getCookieOptions('access');
+    const refreshOpts = this.appConfig.getCookieOptions('refresh');
+    res.clearCookie('access_token', accessOpts);
+    res.clearCookie('refresh_token', refreshOpts);
+    return { ok: true };
+  }
+
 }

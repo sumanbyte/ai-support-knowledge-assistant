@@ -1,25 +1,63 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { DocumentsService } from '../documents/documents.service';
 import { CreateUploadDto } from './dto/create-upload.dto';
 import { UpdateUploadDto } from './dto/update-upload.dto';
-import { DocumentsService } from '../documents/documents.service';
+import { PrismaService } from '../auth/prisma/prisma.service';
+import { User } from '@/generated/prisma/client';
 
 @Injectable()
 export class UploadService {
-
   constructor(
-    private readonly documentService: DocumentsService
+    private readonly documentService: DocumentsService,
+    private readonly cloudinaryService: CloudinaryService,
+
+    private readonly prismaService: PrismaService,
   ) { }
 
-  async create(createUploadDto: CreateUploadDto, file: Express.Multer.File) {
+  async create(_createUploadDto: CreateUploadDto, file: Express.Multer.File, user: Omit<User, 'password'>) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
 
-    this.documentService.processDocument(file.path);
+    const stored = await this.cloudinaryService.uploadFile(file);
+
+    const isPdf =
+      file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf');
+
+    if (isPdf) {
+      void this.documentService
+        .processDocument({
+          buffer: file.buffer,
+          fileName: file.originalname,
+          cloudinaryUrl: stored.secureUrl,
+          publicId: stored.publicId,
+        })
+        .catch((err) => {
+          console.error('Document processing failed:', err);
+        });
+    }
+
+    await this.prismaService.document.create({
+      data: {
+        name: file.originalname,
+        url: stored.secureUrl,
+        userId: user.id,
+
+      },
+    });
 
     return {
       success: true,
-      message: "Processing has been started."
+      message: isPdf
+        ? 'File stored in Cloudinary. Document processing has started.'
+        : 'File stored in Cloudinary.',
+      file: {
+        publicId: stored.publicId,
+        url: stored.secureUrl,
+        format: stored.format,
+        bytes: stored.bytes,
+      },
     };
   }
 
@@ -31,7 +69,7 @@ export class UploadService {
     return `This action returns a #${id} upload`;
   }
 
-  update(id: number, updateUploadDto: UpdateUploadDto) {
+  update(id: number, _updateUploadDto: UpdateUploadDto) {
     return `This action updates a #${id} upload`;
   }
 
