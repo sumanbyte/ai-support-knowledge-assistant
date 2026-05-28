@@ -25,22 +25,11 @@ export class UploadService {
     const isPdf =
       file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf');
 
-    if (isPdf) {
-      void this.documentService
-        .processDocument({
-          buffer: file.buffer,
-          fileName: file.originalname,
-          cloudinaryUrl: stored.secureUrl,
-          publicId: stored.publicId,
-        })
-        .catch((err) => {
-          console.error('Document processing failed:', err);
-        });
-    }
+
 
     const size = file.size / 1024 / 1024;
 
-    await this.prismaService.document.create({
+    const document = await this.prismaService.document.create({
       data: {
         name: file.originalname,
         url: stored.secureUrl,
@@ -53,6 +42,20 @@ export class UploadService {
 
       },
     });
+
+    if (isPdf) {
+      void this.documentService
+        .processDocument({
+          buffer: file.buffer,
+          fileName: file.originalname,
+          cloudinaryUrl: stored.secureUrl,
+          publicId: stored.publicId,
+          documentId: document.id,
+        })
+        .catch((err) => {
+          console.error('Document processing failed:', err);
+        });
+    }
 
     return {
       success: true,

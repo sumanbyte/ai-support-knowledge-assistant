@@ -55,6 +55,13 @@ function toLibraryDocument(
 
 
 export const DocumentLibrary: React.FC = () => {
+  const [documents, setDocuments] = useState<LibraryDocument[]>([]);
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
+  const hasProcessingDocs = useMemo(() => documents.some(doc => doc.status === "PROCESSING"), [documents]);
+
   const { data, execute } = useApi<DocumentResponseDto, []>(
     documentService.getAllDocuments,
   );
@@ -67,7 +74,11 @@ export const DocumentLibrary: React.FC = () => {
     execute: uploadExecute,
   } = useApi<UploadResponseDto, [File]>((file: File) => uploadService.uploadFile(file));
 
+
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+
 
   useError(uploadError);
   const uploadingFile = uploadVariables?.[0];
@@ -97,10 +108,18 @@ export const DocumentLibrary: React.FC = () => {
     execute();
   }, [execute]);
 
-  const [documents, setDocuments] = useState<LibraryDocument[]>([]);
-  const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  useEffect(() => {
+    if (!hasProcessingDocs) return;
+
+    // Set up an interval to fetch fresh data every 4 seconds
+    const interval = setInterval(() => {
+      execute(); // Calls documentService.getAllDocuments
+    }, 4000);
+
+    // Clean up interval when component unmounts or documents change status
+    return () => clearInterval(interval);
+  }, [hasProcessingDocs, execute]);
+
 
   const filtered = useMemo(
     () =>

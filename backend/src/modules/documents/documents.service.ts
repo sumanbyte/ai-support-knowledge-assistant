@@ -7,9 +7,10 @@ import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { User } from '@/generated/prisma/client';
 import { PrismaService } from '../auth/prisma/prisma.service';
-import { DocumentDto, DocumentResponseDto } from './dto/document-response.dto';
+import { DocumentDto, DocumentResponseDto, DocumentStatus } from './dto/document-response.dto';
 
 export interface ProcessDocumentInput {
+  documentId: string;
   buffer: Buffer;
   fileName?: string;
   cloudinaryUrl?: string;
@@ -55,34 +56,57 @@ export class DocumentsService {
   }
 
   async processDocument(input: ProcessDocumentInput) {
-    const { buffer, fileName, cloudinaryUrl, publicId } = input;
+    const { buffer, fileName, cloudinaryUrl, publicId, documentId } = input;
+    try {
+      if (!documentId) {
+        throw new BadRequestException('Document ID is required to process the document');
+      }
+      if (!buffer?.length) {
+        throw new BadRequestException('Document buffer is empty');
+      }
 
-    if (!buffer?.length) {
-      throw new BadRequestException('Document buffer is empty');
+      console.log('Processing document:', fileName ?? publicId ?? 'unknown');
+      if (cloudinaryUrl) {
+        console.log('Cloudinary URL:', cloudinaryUrl);
+      }
+
+      const parser = new PDFParse({ data: buffer });
+      const pdfData = await parser.getText();
+
+      const chunks = this.chunkingService.chunkText(pdfData.text);
+      const embeddings = await this.embeddingService.generateEmbeddings(chunks);
+      const savedEmbeddings = await this.vectorService.saveVectorEmbeddings(
+        chunks,
+        embeddings,
+      );
+
+      await this.prismaService.document.update({
+        where: { id: documentId },
+        data: {
+          status: DocumentStatus.INDEXED,
+          chunks: chunks.length,
+        },
+      })
+
+      console.log(savedEmbeddings);
+
+      return {
+        message: 'Document processed.',
+        chunks: chunks.length,
+        cloudinaryUrl,
+        publicId,
+      };
     }
+    catch (error) {
+      // 3. 🚨 SAFETY NET: Catch any failure in the pipeline instantly
+      console.error(`Failed to process document ${documentId}:`, error);
 
-    console.log('Processing document:', fileName ?? publicId ?? 'unknown');
-    if (cloudinaryUrl) {
-      console.log('Cloudinary URL:', cloudinaryUrl);
+      await this.prismaService.document.update({
+        where: { id: documentId },
+        data: {
+          status: DocumentStatus.ERROR,
+        },
+      });
     }
-
-    const parser = new PDFParse({ data: buffer });
-    const pdfData = await parser.getText();
-
-    const chunks = this.chunkingService.chunkText(pdfData.text);
-    const embeddings = await this.embeddingService.generateEmbeddings(chunks);
-    const savedEmbeddings = await this.vectorService.saveVectorEmbeddings(
-      chunks,
-      embeddings,
-    );
-
-    console.log(savedEmbeddings);
-
-    return {
-      message: 'Document processed.',
-      chunks: chunks.length,
-      cloudinaryUrl,
-      publicId,
-    };
   }
 }
