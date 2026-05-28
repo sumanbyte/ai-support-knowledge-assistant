@@ -1,54 +1,103 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+  Res,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiUnauthorizedResponse,
+  ApiConflictResponse,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { SignupDto } from './dto/signup.dto';
+import { LoginDto } from './dto/login.dto';
+import { AuthUserDto } from './dto/auth-user.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { RefreshResponseDto } from './dto/refresh-response.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from '../user/entities/user.entity';
 import { JwtAuthGuard } from './guards/jwt-auth-guard';
 import { GetUser } from './decorators/current-user.decorator';
-import { LoginDto } from './dto/login.dto';
+import type { Request, Response } from 'express';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
-  @Post("signup")
+  @Post('signup')
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiCreatedResponse({ description: 'User created', type: AuthUserDto })
+  @ApiConflictResponse({ description: 'Email already exists' })
   signup(@Body() signupDto: SignupDto) {
     return this.authService.register(signupDto);
   }
 
-  //Local Sign In
-  @UseGuards(AuthGuard("local"))
-  @Post("login")
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  @UseGuards(AuthGuard('local'))
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Sign in with email and password' })
+  @ApiBody({ type: LoginDto })
+  @ApiOkResponse({
+    description: 'Sets access_token and refresh_token cookies',
+    type: LoginResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
+  login(
+    @GetUser() user: AuthUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.login(user, res);
   }
 
-  // Initiates google oauth redirection 
-  @Get("google")
-  @UseGuards(AuthGuard("google"))
-  async googleAuth(@Req() req) {
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Start Google OAuth' })
+  googleAuth() {}
 
-  }
-
-  //Google OAuth Callback endpoint
-  @Get("google/callback")
-  @UseGuards(AuthGuard("google"))
-  async googleAuthRedirect(@Req() req, @Res() res) {
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Google OAuth callback' })
+  async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const result = await this.authService.validateGoogleUser(req.user);
     return res.status(200).json(result);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get("me")
-  getMe(@GetUser() user: any) {
+  @Get('me')
+  @ApiOperation({ summary: 'Get current user from access token' })
+  @ApiOkResponse({ type: AuthUserDto })
+  @ApiUnauthorizedResponse()
+  getMe(@GetUser() user: AuthUserDto) {
     return user;
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post("refresh")
-  refreshToken(@Req() req) {
-    return this.authService.refreshToken(req);
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token using refresh_token cookie' })
+  @ApiOkResponse({
+    description: 'Issues new tokens (also set as HttpOnly cookies)',
+    type: RefreshResponseDto,
+  })
+  @ApiUnauthorizedResponse()
+  refreshToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.refreshToken(req, res);
   }
 
   @Get()

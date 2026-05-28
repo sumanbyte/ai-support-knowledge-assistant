@@ -5,11 +5,16 @@ import { UserService } from '../user/user.service';
 import { SignupDto } from './dto/signup.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto } from './dto/login.dto';
+import { AppConfig } from '../../config/app.config';
+import type { Request, Response } from 'express';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService, private readonly jwtService: JwtService) { }
+  constructor(
+    private readonly userService: UserService, 
+    private readonly jwtService: JwtService,
+    private readonly appConfig: AppConfig
+  ) { }
   create(createAuthDto: CreateAuthDto) {
     return 'This action adds a new auth';
   }
@@ -33,19 +38,25 @@ export class AuthService {
   async register(signupDto: SignupDto) {
     const { email, name, password } = signupDto;
 
-    const user = await this.userService.findByEmail(email);
+    const existing = await this.userService.findByEmail(email);
 
-    if (user) {
-      throw new ConflictException("Email already exists");
+    if (existing) {
+      throw new ConflictException('Email already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    return this.userService.create({
+    const created = await this.userService.create({
       email,
       name,
       password: hashedPassword,
     });
+
+    return {
+      id: created.id,
+      email: created.email,
+      name: created.name,
+    };
   }
 
   // 2. Validate Local User for Sign In
@@ -87,26 +98,84 @@ export class AuthService {
   async generateToken(user: any) {
     const payload = { email: user.email, sub: user.id };
 
+    const accessToken = this.jwtService.sign(
+      { ...payload, type: 'access' },
+      { expiresIn: this.appConfig.jwtExpiresIn },
+    );
+    const refreshToken = this.jwtService.sign(
+      { ...payload, type: 'refresh' },
+      { expiresIn: this.appConfig.jwtRefreshExpiresIn },
+    );
+
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken,
+      refreshToken,
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
-      }
+      },
+    };
+  }
+
+  async refreshToken(req: Request, res: Response) {
+    const refreshToken = req.cookies?.refresh_token;
+    if (!refreshToken) {
+      throw new UnauthorizedException('Missing refresh token');
     }
-  }
 
-  async refreshToken(req: Request) {
-  }
+    let payload: { email: string; sub: string; type?: string };
+    try {
+      payload = this.jwtService.verify(refreshToken);
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
 
-  async login(loginDto: LoginDto) {
+    if (payload.type !== 'refresh') {
+      throw new UnauthorizedException('Invalid token type');
+    }
 
-    const user = await this.validateUser(loginDto.email, loginDto.password);
+    const user = await this.userService.findByEmail(payload.email);
     if (!user) {
-      throw new UnauthorizedException("Invalid credentials");
+      throw new UnauthorizedException('User no longer exists');
     }
-    return this.generateToken(user);
+
+    const { accessToken, refreshToken: newRefreshToken, user: safeUser } =
+      await this.generateToken(user);
+
+    res.cookie(
+      'refresh_token',
+      newRefreshToken,
+      this.appConfig.getCookieOptions('refresh'),
+    );
+    res.cookie(
+      'access_token',
+      accessToken,
+      this.appConfig.getCookieOptions('access'),
+    );
+
+    return { accessToken, user: safeUser };
+  }
+
+  async login(
+    user: { id: string; email: string; name: string },
+    res: Response,
+  ) {
+    const { accessToken, refreshToken, user: safeUser } =
+      await this.generateToken(user);
+
+    res.cookie(
+      'refresh_token',
+      refreshToken,
+      this.appConfig.getCookieOptions('refresh'),
+    );
+    res.cookie(
+      'access_token',
+      accessToken,
+      this.appConfig.getCookieOptions('access'),
+    );
+
+    return { user: safeUser };
   }
 
 }

@@ -1,5 +1,6 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import App from '../App';
+import '../App.css';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import { AuthProvider } from '../context/AuthContext';
 import {
   AnalyticsPage,
   ChatPage,
@@ -12,23 +13,40 @@ import {
   SettingsPage,
   SignupPage,
 } from '../pages';
+import ProtectedRoute from '../components/Layout/ProtectedRoute';
+import { protectedRouteLoader } from '../loaders/protectedRoute.loader';
+
+function RootLayout() {
+  return (
+    <AuthProvider>
+      <Outlet />
+    </AuthProvider>
+  );
+}
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <RootLayout />,
     children: [
       { index: true, element: <Navigate to="/login" replace /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'signup', element: <SignupPage /> },
-      { path: 'dashboard', element: <EnterpriseHub /> },
-      { path: 'chat', element: <ChatPage /> },
-      { path: 'documents', element: <DocumentLibrary /> },
-      { path: 'knowledge-base', element: <KnowledgeBase /> },
-      { path: 'ingestion', element: <IngestionPipeline /> },
-      { path: 'analytics', element: <AnalyticsPage /> },
-      { path: 'settings', element: <SettingsPage /> },
-      { path: 'profile', element: <ProfilePage /> },
+      {
+        // Same pattern as loader on /dashboard — one loader guards all protected children
+        element: <ProtectedRoute />,
+        loader: protectedRouteLoader, // blocks rendering until /auth/me finishes
+        children: [
+          { path: 'dashboard', element: <EnterpriseHub /> },
+          { path: 'chat', element: <ChatPage /> },
+          { path: 'documents', element: <DocumentLibrary /> },
+          { path: 'knowledge-base', element: <KnowledgeBase /> },
+          { path: 'ingestion', element: <IngestionPipeline /> },
+          { path: 'analytics', element: <AnalyticsPage /> },
+          { path: 'settings', element: <SettingsPage /> },
+          { path: 'profile', element: <ProfilePage /> },
+        ],
+      },
     ],
   },
 ]);

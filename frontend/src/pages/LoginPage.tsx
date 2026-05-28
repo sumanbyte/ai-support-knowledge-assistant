@@ -10,12 +10,15 @@ import { authService } from '../services/authService';
 import { useApi } from '../hooks/useApi';
 import { useError } from '../hooks/useError';
 import { useAppNavigate } from '../hooks/useAppNavigate';
+import { useAuth } from '../context/AuthContext';
+import type { LoginDto } from '../api';
 
 export const LoginPage: React.FC = () => {
   const navigate = useAppNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const { setUser } = useAuth();
 
   const { data, error, loading, execute } = useApi(authService.login);
 
@@ -23,6 +26,7 @@ export const LoginPage: React.FC = () => {
 
   useEffect(() => {
     if (!data) return;
+    setUser(data.user)
     toast.success('Welcome back.', {
       description: 'Redirecting to Mission Control.',
     });
@@ -31,7 +35,7 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    execute({ email, password });
+    execute({ email, password } satisfies LoginDto);
 
   };
 
