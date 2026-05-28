@@ -1,0 +1,15 @@
+{
+  "models": {
+    "Document": {
+      "excludeFields": ["user"],
+      "responses": {
+        "DocumentResponseDto": {
+          "properties": {
+            "documents": { "type": "array", "items": "Document" }
+          },
+          "required": ["documents"]
+        }
+      }
+    }
+  }
+}

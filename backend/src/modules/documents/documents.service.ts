@@ -5,6 +5,9 @@ import { EmbeddingsService } from '../embeddings/embeddings.service';
 import { VectorService } from '../vector/vector.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
+import { User } from '@/generated/prisma/client';
+import { PrismaService } from '../auth/prisma/prisma.service';
+import { DocumentDto, DocumentResponseDto } from './dto/document-response.dto';
 
 export interface ProcessDocumentInput {
   buffer: Buffer;
@@ -19,14 +22,23 @@ export class DocumentsService {
     private readonly chunkingService: ChunkingService,
     private readonly embeddingService: EmbeddingsService,
     private readonly vectorService: VectorService,
-  ) {}
+    private readonly prismaService: PrismaService,
+  ) { }
 
   create(_createDocumentDto: CreateDocumentDto) {
     return 'This action adds a new document';
   }
 
-  findAll() {
-    return `This action returns all documents`;
+  async findAll(user: Omit<User, 'password'>): Promise<DocumentResponseDto> {
+    const rows = await this.prismaService.document.findMany({
+      where: { userId: user.id },
+    });
+    const documents: DocumentDto[] = rows.map((row) => ({
+      ...row,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    }));
+    return { documents };
   }
 
   findOne(id: number) {

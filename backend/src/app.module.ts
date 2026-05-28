@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ChatModule } from './modules/chat/chat.module';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { DocumentsModule } from './modules/documents/documents.module';
 import { AppConfigModule } from './config/app-config.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { AppConfigModule } from './config/app-config.module';
     ChatModule,
     UserModule,
     AuthModule,
+    DocumentsModule
   ],
   controllers: [AppController],
   providers: [AppService],

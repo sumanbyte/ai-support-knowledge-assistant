@@ -13,3 +13,7 @@ export type SignupDto = components['schemas']['SignupDto'];
 export type AuthUserDto = components['schemas']['AuthUserDto'];
 export type LoginResponseDto = components['schemas']['LoginResponseDto'];
 export type RefreshResponseDto = components['schemas']['RefreshResponseDto'];
+export type DocumentResponseDto = components['schemas']['DocumentResponseDto'];
+export type DocumentDto = components['schemas']['DocumentDto'];
+export type DocumentStatus = components['schemas']['DocumentStatus'];
+export type DocumentIcon = components['schemas']['DocumentIcon'];

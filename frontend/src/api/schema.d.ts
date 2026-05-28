@@ -29,6 +29,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Upload a file */
         post: operations["UploadController_create"];
         delete?: never;
         options?: never;
@@ -266,6 +267,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Clear auth cookies and sign out */
+        post: operations["AuthController_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth": {
         parameters: {
             query?: never;
@@ -296,6 +314,54 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["AuthController_update"];
+        trace?: never;
+    };
+    "/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["DocumentsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["DocumentsController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["DocumentsController_findOne"];
+        put?: never;
+        post?: never;
+        delete: operations["DocumentsController_remove"];
+        options?: never;
+        head?: never;
+        patch: operations["DocumentsController_update"];
         trace?: never;
     };
 }
@@ -339,6 +405,30 @@ export interface components {
             user: components["schemas"]["AuthUserDto"];
         };
         UpdateAuthDto: Record<string, never>;
+        CreateDocumentDto: Record<string, never>;
+        /** @enum {string} */
+        DocumentStatus: "PROCESSING" | "INDEXED" | "ERROR";
+        /** @enum {string} */
+        DocumentIcon: "PICTURE_AS_PDF" | "DESCRIPTION" | "MARKDOWN" | "CODE" | "SLIDESHOW" | "YAML";
+        DocumentDto: {
+            id?: string;
+            name: string;
+            size: string;
+            dept: string;
+            status?: components["schemas"]["DocumentStatus"];
+            chunks: number;
+            icon: components["schemas"]["DocumentIcon"];
+            url: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt: string;
+            userId: string;
+        };
+        DocumentResponseDto: {
+            documents: components["schemas"]["DocumentDto"][];
+        };
+        UpdateDocumentDto: Record<string, never>;
     };
     responses: never;
     parameters: never;
@@ -378,6 +468,7 @@ export interface operations {
             };
         };
         responses: {
+            /** @description File uploaded successfully */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -843,6 +934,24 @@ export interface operations {
             };
         };
     };
+    AuthController_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Logged out */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     AuthController_findAll: {
         parameters: {
             query?: never;
@@ -910,6 +1019,108 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["UpdateAuthDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DocumentsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDocumentDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DocumentsController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description All documents */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentResponseDto"];
+                };
+            };
+        };
+    };
+    DocumentsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DocumentsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DocumentsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDocumentDto"];
             };
         };
         responses: {

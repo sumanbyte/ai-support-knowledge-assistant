@@ -31,9 +31,10 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "File uploaded successfully"
           }
         },
+        "summary": "Upload a file",
         "tags": [
           "Upload"
         ]
@@ -528,6 +529,21 @@
         ]
       }
     },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Logged out"
+          }
+        },
+        "summary": "Clear auth cookies and sign out",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/auth": {
       "get": {
         "operationId": "AuthController_findAll",
@@ -614,6 +630,126 @@
         },
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/documents": {
+      "post": {
+        "operationId": "DocumentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDocumentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/all": {
+      "get": {
+        "operationId": "DocumentsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}": {
+      "get": {
+        "operationId": "DocumentsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      },
+      "patch": {
+        "operationId": "DocumentsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDocumentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      },
+      "delete": {
+        "operationId": "DocumentsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Documents"
         ]
       }
     }
@@ -745,6 +881,49 @@
         ]
       },
       "UpdateAuthDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateDocumentDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "DocumentStatus": {
+        "type": "string",
+        "enum": ["PROCESSING", "INDEXED", "ERROR"]
+      },
+      "DocumentIcon": {
+        "type": "string",
+        "enum": ["PICTURE_AS_PDF", "DESCRIPTION", "MARKDOWN", "CODE", "SLIDESHOW", "YAML"]
+      },
+      "DocumentDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "size": { "type": "string" },
+          "dept": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/DocumentStatus" },
+          "chunks": { "type": "number" },
+          "icon": { "$ref": "#/components/schemas/DocumentIcon" },
+          "url": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "userId": { "type": "string" }
+        },
+        "required": ["name", "size", "dept", "chunks", "icon", "url", "updatedAt", "userId"]
+      },
+      "DocumentResponseDto": {
+        "type": "object",
+        "properties": {
+          "documents": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DocumentDto" }
+          }
+        },
+        "required": ["documents"]
+      },
+      "UpdateDocumentDto": {
         "type": "object",
         "properties": {}
       }

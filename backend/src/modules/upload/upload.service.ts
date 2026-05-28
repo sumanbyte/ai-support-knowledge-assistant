@@ -4,7 +4,7 @@ import { DocumentsService } from '../documents/documents.service';
 import { CreateUploadDto } from './dto/create-upload.dto';
 import { UpdateUploadDto } from './dto/update-upload.dto';
 import { PrismaService } from '../auth/prisma/prisma.service';
-import { User } from '@/generated/prisma/client';
+import { DocumentIcon, DocumentStatus, User } from '@/generated/prisma/client';
 
 @Injectable()
 export class UploadService {
@@ -38,11 +38,18 @@ export class UploadService {
         });
     }
 
+    const size = file.size / 1024 / 1024;
+
     await this.prismaService.document.create({
       data: {
         name: file.originalname,
         url: stored.secureUrl,
         userId: user.id,
+        size: `${size} MB`,
+        dept: "Technology",
+        chunks: 0,
+        icon: DocumentIcon.PICTURE_AS_PDF,
+        status: DocumentStatus.PROCESSING,
 
       },
     });

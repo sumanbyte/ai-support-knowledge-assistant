@@ -1,14 +1,72 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
 import { DEMO_DOCUMENTS } from '../data/mockData';
-type DocStatus = 'indexed' | 'processing' | 'error';
+import { useApi } from '../hooks/useApi';
+import { documentService } from '../services/documentService';
+import type { DocumentIcon, DocumentResponseDto, DocumentStatus } from '../api';
+
 type ViewMode = 'grid' | 'list';
 
+type LibraryDocument = {
+  id: string;
+  name: string;
+  fullName: string;
+  size: string;
+  dept: string;
+  status: DocumentStatus;
+  chunks: number;
+  synced: string;
+  icon: string;
+  iconColor: string;
+};
+
+const ICON_TO_MATERIAL: Record<DocumentIcon, string> = {
+  PICTURE_AS_PDF: 'picture_as_pdf',
+  DESCRIPTION: 'description',
+  MARKDOWN: 'markdown',
+  CODE: 'code',
+  SLIDESHOW: 'slideshow',
+  YAML: 'data_object',
+};
+
+function toLibraryDocument(
+  doc: DocumentResponseDto['documents'][number],
+): LibraryDocument {
+  return {
+    id: doc.id ?? '',
+    name: doc.name,
+    fullName: doc.name,
+    size: doc.size,
+    dept: doc.dept,
+    status: doc.status ?? 'PROCESSING',
+    chunks: doc.chunks,
+    icon: ICON_TO_MATERIAL[doc.icon] ?? 'description',
+    iconColor: 'text-[#ff3b30] bg-[#ff3b30]/10 border-[#ff3b30]/20',
+    synced: 'Just now',
+  };
+}
+
+
+
 export const DocumentLibrary: React.FC = () => {
-  const [documents, setDocuments] = useState(DEMO_DOCUMENTS);
+  const { data, execute } = useApi<DocumentResponseDto, []>(
+    documentService.getAllDocuments,
+  );
+
+  useEffect(() => {
+    if (data?.documents) {
+      setDocuments(data.documents.map(toLibraryDocument));
+    }
+  }, [data]);
+
+  useEffect(() => {
+    execute();
+  }, [execute]);
+
+  const [documents, setDocuments] = useState<LibraryDocument[]>(DEMO_DOCUMENTS);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -46,7 +104,7 @@ export const DocumentLibrary: React.FC = () => {
         fullName: 'New_Upload.pdf',
         size: '1.1 MB',
         dept: 'Uploads',
-        status: 'processing' as const,
+        status: 'PROCESSING',
         chunks: 0,
         synced: 'Just now',
         icon: 'picture_as_pdf',
@@ -57,21 +115,21 @@ export const DocumentLibrary: React.FC = () => {
     setTimeout(() => {
       setDocuments((prev) =>
         prev.map((d) =>
-          d.id === id ? { ...d, status: 'indexed' as DocStatus, chunks: 120 } : d
+          d.id === id ? { ...d, status: 'indexed' as DocumentStatus, chunks: 120 } : d
         )
       );
     }, 3000);
   };
 
-  const statusBadge = (status: DocStatus) => {
-    if (status === 'indexed')
+  const statusBadge = (status: DocumentStatus) => {
+    if (status === 'INDEXED')
       return (
         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-dim border border-outline-variant font-label-sm text-on-surface">
           <div className="w-1.5 h-1.5 rounded-full bg-[#34c759]" />
           Indexed
         </div>
       );
-    if (status === 'processing')
+    if (status === 'PROCESSING')
       return (
         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary-container/20 border border-primary/30 font-label-sm text-primary">
           <Icon name="refresh" size={12} className="animate-spin" />
@@ -218,19 +276,19 @@ export const DocumentLibrary: React.FC = () => {
               <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between relative z-10 flex-wrap gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   {statusBadge(doc.status)}
-                  {doc.status === 'indexed' && (
+                  {doc.status === 'INDEXED' && (
                     <span className="font-label-sm text-on-surface-variant bg-surface-dim px-2 py-0.5 rounded-full border border-white/5">
                       {doc.chunks.toLocaleString()} chunks
                     </span>
                   )}
-                  {doc.status === 'processing' && (
+                  {doc.status === 'PROCESSING' && (
                     <span className="font-label-sm text-on-surface-variant bg-surface-dim px-2 py-0.5 rounded-full border border-white/5">
                       Parsing...
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-1 text-on-surface-variant text-xs">
-                  {doc.status === 'indexed' && <Icon name="sync" size={14} />}
+                  {doc.status === 'INDEXED' && <Icon name="sync" size={14} />}
                   {doc.synced}
                 </div>
               </div>
