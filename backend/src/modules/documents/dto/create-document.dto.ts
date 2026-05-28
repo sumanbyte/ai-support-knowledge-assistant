@@ -1,1 +1,1 @@
-export class CreateDocumentDto {}
+export class CreateDocumentDto { }

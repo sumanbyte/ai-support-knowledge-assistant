@@ -4,6 +4,6 @@ import { axiosInstance } from "../config/api";
 
 export const documentService = {
     getAllDocuments: (): Promise<DocumentResponseDto> =>
-        axiosInstance.get('/documents/all') as Promise<Docum>,
+        axiosInstance.get('/documents/all') as Promise<DocumentResponseDto>,
 
 };

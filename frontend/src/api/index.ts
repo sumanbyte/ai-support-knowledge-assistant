@@ -15,5 +15,8 @@ export type LoginResponseDto = components['schemas']['LoginResponseDto'];
 export type RefreshResponseDto = components['schemas']['RefreshResponseDto'];
 export type DocumentResponseDto = components['schemas']['DocumentResponseDto'];
 export type DocumentDto = components['schemas']['DocumentDto'];
-export type DocumentStatus = components['schemas']['DocumentStatus'];
-export type DocumentIcon = components['schemas']['DocumentIcon'];
+/** Inlined on DocumentDto in OpenAPI — not a separate schema component */
+export type DocumentStatus = DocumentDto['status'];
+export type DocumentIcon = DocumentDto['icon'];
+export type UploadedFileInfoDto = components['schemas']['UploadedFileInfoDto'];
+export type UploadResponseDto = components['schemas']['UploadResponseDto'];

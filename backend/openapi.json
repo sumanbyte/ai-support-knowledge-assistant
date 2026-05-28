@@ -32,6 +32,16 @@
         "responses": {
           "201": {
             "description": "File uploaded successfully"
+          },
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Upload a file",
@@ -768,6 +778,59 @@
         "type": "object",
         "properties": {}
       },
+      "UploadedFileInfoDto": {
+        "type": "object",
+        "properties": {
+          "publicId": {
+            "type": "string",
+            "description": "Public ID"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL"
+          },
+          "format": {
+            "type": "string",
+            "description": "Format"
+          },
+          "bytes": {
+            "type": "number",
+            "description": "Bytes"
+          }
+        },
+        "required": [
+          "publicId",
+          "url",
+          "format",
+          "bytes"
+        ]
+      },
+      "UploadResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Success"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message"
+          },
+          "file": {
+            "description": "File",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UploadedFileInfoDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "file"
+        ]
+      },
       "UpdateUploadDto": {
         "type": "object",
         "properties": {}
@@ -888,40 +951,83 @@
         "type": "object",
         "properties": {}
       },
-      "DocumentStatus": {
-        "type": "string",
-        "enum": ["PROCESSING", "INDEXED", "ERROR"]
-      },
-      "DocumentIcon": {
-        "type": "string",
-        "enum": ["PICTURE_AS_PDF", "DESCRIPTION", "MARKDOWN", "CODE", "SLIDESHOW", "YAML"]
-      },
       "DocumentDto": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "size": { "type": "string" },
-          "dept": { "type": "string" },
-          "status": { "$ref": "#/components/schemas/DocumentStatus" },
-          "chunks": { "type": "number" },
-          "icon": { "$ref": "#/components/schemas/DocumentIcon" },
-          "url": { "type": "string" },
-          "createdAt": { "type": "string", "format": "date-time" },
-          "updatedAt": { "type": "string", "format": "date-time" },
-          "userId": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "dept": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PROCESSING",
+              "INDEXED",
+              "ERROR"
+            ],
+            "default": "PROCESSING"
+          },
+          "chunks": {
+            "type": "number"
+          },
+          "icon": {
+            "type": "string",
+            "enum": [
+              "PICTURE_AS_PDF",
+              "DESCRIPTION",
+              "MARKDOWN",
+              "CODE",
+              "SLIDESHOW",
+              "YAML"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": "string"
+          }
         },
-        "required": ["name", "size", "dept", "chunks", "icon", "url", "updatedAt", "userId"]
+        "required": [
+          "name",
+          "size",
+          "dept",
+          "chunks",
+          "icon",
+          "url",
+          "updatedAt",
+          "userId"
+        ]
       },
       "DocumentResponseDto": {
         "type": "object",
         "properties": {
           "documents": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/DocumentDto" }
+            "items": {
+              "$ref": "#/components/schemas/DocumentDto"
+            }
           }
         },
-        "required": ["documents"]
+        "required": [
+          "documents"
+        ]
       },
       "UpdateDocumentDto": {
         "type": "object",

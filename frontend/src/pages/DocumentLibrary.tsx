@@ -1,12 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
-import { DEMO_DOCUMENTS } from '../data/mockData';
 import { useApi } from '../hooks/useApi';
 import { documentService } from '../services/documentService';
-import type { DocumentIcon, DocumentResponseDto, DocumentStatus } from '../api';
+import type { DocumentIcon, DocumentResponseDto, DocumentStatus, UploadResponseDto } from '../api';
+import { uploadService } from '../services/uploadService';
+import { toast } from 'sonner';
+import { useError } from '../hooks/useError';
+import { useLoading } from '../hooks/useLoading';
 
 type ViewMode = 'grid' | 'list';
 
@@ -56,6 +59,34 @@ export const DocumentLibrary: React.FC = () => {
     documentService.getAllDocuments,
   );
 
+  const {
+    data: uploadData,
+    error: uploadError,
+    loading: uploadLoading,
+    variables: uploadVariables,
+    execute: uploadExecute,
+  } = useApi<UploadResponseDto, [File]>((file: File) => uploadService.uploadFile(file));
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useError(uploadError);
+  const uploadingFile = uploadVariables?.[0];
+  useLoading(
+    uploadLoading,
+    uploadingFile ? `Uploading ${uploadingFile.name}...` : 'Uploading file...',
+  );
+
+
+  useEffect(() => {
+    if (!uploadData) return;
+    if (uploadData.success) {
+      toast.success(uploadData.message, {
+        description: `File ${uploadData.file.publicId} uploaded successfully.`,
+      });
+      execute()
+    }
+  }, [uploadData]);
+
   useEffect(() => {
     if (data?.documents) {
       setDocuments(data.documents.map(toLibraryDocument));
@@ -66,7 +97,7 @@ export const DocumentLibrary: React.FC = () => {
     execute();
   }, [execute]);
 
-  const [documents, setDocuments] = useState<LibraryDocument[]>(DEMO_DOCUMENTS);
+  const [documents, setDocuments] = useState<LibraryDocument[]>([]);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -95,30 +126,13 @@ export const DocumentLibrary: React.FC = () => {
     else setSelected(new Set(filtered.map((d) => d.id)));
   };
 
-  const handleUpload = () => {
-    const id = Date.now().toString();
-    setDocuments((prev) => [
-      {
-        id,
-        name: 'New_Upload.pdf',
-        fullName: 'New_Upload.pdf',
-        size: '1.1 MB',
-        dept: 'Uploads',
-        status: 'PROCESSING',
-        chunks: 0,
-        synced: 'Just now',
-        icon: 'picture_as_pdf',
-        iconColor: 'text-[#ff3b30] bg-[#ff3b30]/10 border-[#ff3b30]/20',
-      },
-      ...prev,
-    ]);
-    setTimeout(() => {
-      setDocuments((prev) =>
-        prev.map((d) =>
-          d.id === id ? { ...d, status: 'indexed' as DocumentStatus, chunks: 120 } : d
-        )
-      );
-    }, 3000);
+  const handleUpload = (file: File) => {
+    uploadExecute(file);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null;
+    }
+
   };
 
   const statusBadge = (status: DocumentStatus) => {
@@ -150,14 +164,25 @@ export const DocumentLibrary: React.FC = () => {
           title="Document Library"
           subtitle="Manage and sync your enterprise knowledge sources."
           actions={
-            <button
-              type="button"
-              onClick={handleUpload}
-              className="bg-primary text-on-primary hover:opacity-90 px-4 py-2 rounded-lg flex items-center gap-2 font-semibold shadow-[0_0_15px_rgba(221,183,255,0.2)] transition-smooth active:scale-95"
-            >
-              <Icon name="upload_file" size={20} />
-              Upload New
-            </button>
+            <>
+              <input
+                type="file"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleUpload(file);
+                }}
+                className="hidden"
+                ref={fileInputRef}
+              />
+              <button
+                type="button"
+                className="bg-primary text-on-primary hover:opacity-90 px-4 py-2 rounded-lg flex items-center gap-2 font-semibold shadow-[0_0_15px_rgba(221,183,255,0.2)] transition-smooth active:scale-95"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Icon name="upload_file" size={20} />
+                Upload New
+              </button>
+            </>
           }
         />
       }
@@ -299,8 +324,8 @@ export const DocumentLibrary: React.FC = () => {
         {/* Upload drop zone */}
         <button
           type="button"
-          onClick={handleUpload}
           className="w-full glass-panel rounded-xl border-2 border-dashed border-outline-variant/30 hover:border-primary/40 py-12 flex flex-col items-center gap-3 transition-all group"
+          onClick={() => fileInputRef.current?.click()}
         >
           <Icon name="cloud_upload" size={48} className="text-primary group-hover:scale-110 transition-transform" />
           <p className="text-on-surface font-semibold">Drop files to ingest into knowledge base</p>

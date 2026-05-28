@@ -369,6 +369,24 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         CreateUploadDto: Record<string, never>;
+        UploadedFileInfoDto: {
+            /** @description Public ID */
+            publicId: string;
+            /** @description URL */
+            url: string;
+            /** @description Format */
+            format: string;
+            /** @description Bytes */
+            bytes: number;
+        };
+        UploadResponseDto: {
+            /** @description Success */
+            success: boolean;
+            /** @description Message */
+            message: string;
+            /** @description File */
+            file: components["schemas"]["UploadedFileInfoDto"];
+        };
         UpdateUploadDto: Record<string, never>;
         CreateChatDto: Record<string, never>;
         UpdateChatDto: Record<string, never>;
@@ -406,18 +424,19 @@ export interface components {
         };
         UpdateAuthDto: Record<string, never>;
         CreateDocumentDto: Record<string, never>;
-        /** @enum {string} */
-        DocumentStatus: "PROCESSING" | "INDEXED" | "ERROR";
-        /** @enum {string} */
-        DocumentIcon: "PICTURE_AS_PDF" | "DESCRIPTION" | "MARKDOWN" | "CODE" | "SLIDESHOW" | "YAML";
         DocumentDto: {
             id?: string;
             name: string;
             size: string;
             dept: string;
-            status?: components["schemas"]["DocumentStatus"];
+            /**
+             * @default PROCESSING
+             * @enum {string}
+             */
+            status: "PROCESSING" | "INDEXED" | "ERROR";
             chunks: number;
-            icon: components["schemas"]["DocumentIcon"];
+            /** @enum {string} */
+            icon: "PICTURE_AS_PDF" | "DESCRIPTION" | "MARKDOWN" | "CODE" | "SLIDESHOW" | "YAML";
             url: string;
             /** Format: date-time */
             createdAt?: string;
@@ -474,6 +493,14 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadResponseDto"];
+                };
             };
         };
     };

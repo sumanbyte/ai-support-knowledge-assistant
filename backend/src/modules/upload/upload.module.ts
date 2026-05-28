@@ -9,18 +9,14 @@ import { VectorService } from '../vector/vector.service';
 import { UploadController } from './upload.controller';
 import { UploadService } from './upload.service';
 import { PrismaService } from '../auth/prisma/prisma.service';
+import { uploadFileFilter } from './upload-file.filter';
 
 @Module({
   imports: [
     CloudinaryModule,
     MulterModule.register({
       storage: memoryStorage(),
-      fileFilter: (_req, file, callback) => {
-        if (!file.originalname.match(/\.(jpg|jpeg|png|gif|pdf)$/i)) {
-          return callback(new Error('Only image and PDF files are allowed!'), false);
-        }
-        callback(null, true);
-      },
+      fileFilter: uploadFileFilter,
       limits: {
         fileSize: 10 * 1024 * 1024, // 10MB (Cloudinary free tier allows up to 10MB per file)
       },
