@@ -21,3 +21,5 @@ export type DocumentIcon = DocumentDto['icon'];
 export type UploadedFileInfoDto = components['schemas']['UploadedFileInfoDto'];
 export type UploadResponseDto = components['schemas']['UploadResponseDto'];
 export type DeleteResponseDto = components['schemas']['DeleteResponseDto'];
+export type DocumentAnalyticsResponseDto =
+  components['schemas']['DocumentAnalyticsResponseDto'];

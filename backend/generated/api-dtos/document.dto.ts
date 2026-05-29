@@ -16,7 +16,7 @@ export class DocumentDto {
   name: string;
 
   @ApiProperty()
-  size: string;
+  size: number;
 
   @ApiProperty()
   dept: string;

@@ -769,6 +769,138 @@
           "Documents"
         ]
       }
+    },
+    "/analytics": {
+      "post": {
+        "operationId": "AnalyticsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAnalyticsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Analytics"
+        ]
+      },
+      "get": {
+        "operationId": "AnalyticsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/analytics/documents": {
+      "get": {
+        "operationId": "AnalyticsController_getDocumentsAnalytics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentAnalyticsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/analytics/{id}": {
+      "get": {
+        "operationId": "AnalyticsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Analytics"
+        ]
+      },
+      "patch": {
+        "operationId": "AnalyticsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAnalyticsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Analytics"
+        ]
+      },
+      "delete": {
+        "operationId": "AnalyticsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Analytics"
+        ]
+      }
     }
   },
   "info": {
@@ -855,7 +987,7 @@
             "type": "string"
           },
           "size": {
-            "type": "string"
+            "type": "number"
           },
           "dept": {
             "type": "string"
@@ -1067,6 +1199,33 @@
         ]
       },
       "UpdateDocumentDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateAnalyticsDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "DocumentAnalyticsResponseDto": {
+        "type": "object",
+        "properties": {
+          "totalDocuments": {
+            "type": "number"
+          },
+          "indexSize": {
+            "type": "number"
+          },
+          "averageRelevanceScore": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "totalDocuments",
+          "indexSize",
+          "averageRelevanceScore"
+        ]
+      },
+      "UpdateAnalyticsDto": {
         "type": "object",
         "properties": {}
       }

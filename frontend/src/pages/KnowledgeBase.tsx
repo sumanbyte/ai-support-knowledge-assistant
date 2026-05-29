@@ -1,9 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
 import { useAppNavigate } from '../hooks/useAppNavigate';
+import { useApi } from '../hooks/useApi';
+import type { DocumentAnalyticsResponseDto } from '../api';
+import { analyticsService } from '../services/analyticsService';
 
 const ENTRIES = [
   { id: '1', title: 'API Authentication Overview', category: 'API Reference', chunks: 12, updated: 'May 24', score: 94 },
@@ -20,6 +23,24 @@ export const KnowledgeBase: React.FC = () => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [totalDocuments, setTotalDocuments] = useState(0);
+  const [indexSize, setIndexSize] = useState(0);
+  const [averageRelevanceScore, setAverageRelevanceScore] = useState(0);
+
+  const { data: analyticsData, execute: executeAnalytics } =
+    useApi<DocumentAnalyticsResponseDto, []>(analyticsService.getDocumentsAnalytics);
+
+  useEffect(() => {
+    if (analyticsData) {
+      setTotalDocuments(analyticsData.totalDocuments);
+      setIndexSize(analyticsData.indexSize);
+      setAverageRelevanceScore(analyticsData.averageRelevanceScore);
+    }
+  }, [analyticsData]);
+
+  useEffect(() => {
+    executeAnalytics();
+  }, []);
 
   const filtered = useMemo(
     () =>
@@ -68,11 +89,10 @@ export const KnowledgeBase: React.FC = () => {
               key={cat}
               type="button"
               onClick={() => setCategory(cat)}
-              className={`px-3 py-1 rounded-full text-sm font-medium border transition-smooth ${
-                category === cat
-                  ? 'bg-primary/15 text-primary border-primary/30'
-                  : 'text-on-surface-variant border-outline-variant/30 hover:border-primary/30 hover:text-primary'
-              }`}
+              className={`px-3 py-1 rounded-full text-sm font-medium border transition-smooth ${category === cat
+                ? 'bg-primary/15 text-primary border-primary/30'
+                : 'text-on-surface-variant border-outline-variant/30 hover:border-primary/30 hover:text-primary'
+                }`}
             >
               {cat}
               {cat === 'All' && ` (${ENTRIES.length})`}
@@ -82,9 +102,9 @@ export const KnowledgeBase: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { label: 'Total Entries', value: '48', icon: 'menu_book' },
-            { label: 'Avg Relevance', value: '0.89', icon: 'star' },
-            { label: 'Index Size', value: '124 MB', icon: 'storage' },
+            { label: 'Total Entries', value: totalDocuments, icon: 'menu_book' },
+            { label: 'Avg Relevance', value: averageRelevanceScore, icon: 'star' },
+            { label: 'Index Size', value: `${indexSize} MB`, icon: 'storage' },
           ].map((s) => (
             <div key={s.label} className="glass-panel p-5 rounded-xl flex items-center gap-4">
               <span className="p-3 rounded-lg bg-primary/10 text-primary">
@@ -102,9 +122,8 @@ export const KnowledgeBase: React.FC = () => {
           {filtered.map((entry) => (
             <div
               key={entry.id}
-              className={`glass-panel rounded-xl p-5 cursor-pointer transition-all duration-200 hover:border-primary/25 ${
-                expanded === entry.id ? 'ring-1 ring-primary/40' : ''
-              }`}
+              className={`glass-panel rounded-xl p-5 cursor-pointer transition-all duration-200 hover:border-primary/25 ${expanded === entry.id ? 'ring-1 ring-primary/40' : ''
+                }`}
               onClick={() => setExpanded(expanded === entry.id ? null : entry.id)}
             >
               <div className="flex items-start justify-between gap-4">

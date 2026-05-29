@@ -51,7 +51,7 @@ model Document {
   id        String         @id @default(uuid())
   publicId  String         @unique
   name      String
-  size      String
+  size      Float
   dept      String
   status    DocumentStatus @default(PROCESSING)
   chunks    Int

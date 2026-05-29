@@ -30,7 +30,7 @@ export class UploadService {
 
 
 
-    const size = file.size / 1024 / 1024;
+    const size = (file.size / 1024 / 1024).toFixed(3);
 
     const document = await this.prismaService.document.create({
       data: {
@@ -38,7 +38,7 @@ export class UploadService {
         publicId: stored.publicId,
         url: stored.secureUrl,
         userId: user.id,
-        size: `${size} MB`,
+        size: Number(size),
         dept: "Technology",
         chunks: 0,
         icon: DocumentIcon.PICTURE_AS_PDF,

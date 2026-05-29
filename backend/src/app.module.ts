@@ -7,6 +7,7 @@ import { ChatModule } from './modules/chat/chat.module';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DocumentsModule } from './modules/documents/documents.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AppConfigModule } from './config/app-config.module';
 
 @Module({
@@ -19,7 +20,8 @@ import { AppConfigModule } from './config/app-config.module';
     ChatModule,
     UserModule,
     AuthModule,
-    DocumentsModule
+    DocumentsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
