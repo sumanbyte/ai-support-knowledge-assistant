@@ -70,6 +70,9 @@ export class DocumentsService {
         console.log('Cloudinary URL:', cloudinaryUrl);
       }
 
+      // Clear any prior chunks for this document (retries / re-process).
+      await this.vectorService.deleteVectorEmbeddings(documentId);
+
       const parser = new PDFParse({ data: buffer });
       const pdfData = await parser.getText();
 
@@ -78,6 +81,8 @@ export class DocumentsService {
       const savedEmbeddings = await this.vectorService.saveVectorEmbeddings(
         chunks,
         embeddings,
+        documentId,
+        fileName ?? 'unknown'
       );
 
       await this.prismaService.document.update({

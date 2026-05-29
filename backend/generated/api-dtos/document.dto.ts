@@ -10,6 +10,9 @@ export class DocumentDto {
   id?: string;
 
   @ApiProperty()
+  publicId: string;
+
+  @ApiProperty()
   name: string;
 
   @ApiProperty()

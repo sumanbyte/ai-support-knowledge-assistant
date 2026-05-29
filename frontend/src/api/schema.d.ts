@@ -388,6 +388,35 @@ export interface components {
             file: components["schemas"]["UploadedFileInfoDto"];
         };
         UpdateUploadDto: Record<string, never>;
+        DocumentDto: {
+            id?: string;
+            publicId: string;
+            name: string;
+            size: string;
+            dept: string;
+            /**
+             * @default PROCESSING
+             * @enum {string}
+             */
+            status: "PROCESSING" | "INDEXED" | "ERROR";
+            chunks: number;
+            /** @enum {string} */
+            icon: "PICTURE_AS_PDF" | "DESCRIPTION" | "MARKDOWN" | "CODE" | "SLIDESHOW" | "YAML";
+            url: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt: string;
+            userId: string;
+        };
+        DeleteResponseDto: {
+            /** @description Success */
+            success: boolean;
+            /** @description Message */
+            message: string;
+            /** @description Data */
+            data: components["schemas"]["DocumentDto"];
+        };
         CreateChatDto: Record<string, never>;
         UpdateChatDto: Record<string, never>;
         CreateUserDto: Record<string, never>;
@@ -424,26 +453,6 @@ export interface components {
         };
         UpdateAuthDto: Record<string, never>;
         CreateDocumentDto: Record<string, never>;
-        DocumentDto: {
-            id?: string;
-            name: string;
-            size: string;
-            dept: string;
-            /**
-             * @default PROCESSING
-             * @enum {string}
-             */
-            status: "PROCESSING" | "INDEXED" | "ERROR";
-            chunks: number;
-            /** @enum {string} */
-            icon: "PICTURE_AS_PDF" | "DESCRIPTION" | "MARKDOWN" | "CODE" | "SLIDESHOW" | "YAML";
-            url: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt: string;
-            userId: string;
-        };
         DocumentResponseDto: {
             documents: components["schemas"]["DocumentDto"][];
         };
@@ -555,7 +564,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DeleteResponseDto"];
+                };
             };
         };
     };

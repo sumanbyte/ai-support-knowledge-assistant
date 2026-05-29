@@ -1,0 +1,107 @@
+/* Native <dialog> — backdrop and panel (no JS for open/close) */
+
+.delete-dialog {
+  margin: auto;
+  max-width: 28rem;
+  width: calc(100% - 2rem);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+.delete-dialog::backdrop {
+  background: rgb(9 9 11 / 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.delete-dialog[open] {
+  animation: delete-dialog-in 0.2s ease-out;
+}
+
+@keyframes delete-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.delete-dialog__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+}
+
+.delete-dialog__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--color-error) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-error) 25%, transparent);
+  color: var(--color-error);
+}
+
+.delete-dialog__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+.delete-dialog__description {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.delete-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.delete-dialog__btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.delete-dialog__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.delete-dialog__btn--cancel {
+  background: var(--color-surface-container);
+  color: var(--color-on-surface);
+  border: 1px solid var(--color-outline-variant);
+}
+
+.delete-dialog__btn--cancel:hover:not(:disabled) {
+  background: var(--color-surface-container-high);
+}
+
+.delete-dialog__btn--confirm {
+  background: var(--color-error-container);
+  color: var(--color-on-error-container);
+  border: 1px solid color-mix(in srgb, var(--color-error) 35%, transparent);
+}
+
+.delete-dialog__btn--confirm:hover:not(:disabled) {
+  opacity: 0.9;
+}

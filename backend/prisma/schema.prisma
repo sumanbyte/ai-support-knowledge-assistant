@@ -49,6 +49,7 @@ model User {
 
 model Document {
   id        String         @id @default(uuid())
+  publicId  String         @unique
   name      String
   size      String
   dept      String

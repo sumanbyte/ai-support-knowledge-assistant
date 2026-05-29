@@ -35,11 +35,28 @@ export class VectorService {
     return `This action removes a #${id} vector`;
   }
 
-  async saveVectorEmbeddings(chunks: string[], vectors: number[][]) {
+  async deleteVectorEmbeddings(documentId: string) {
+    try {
+      // Metadata fields are filtered by key name directly (not "metadata.documentId").
+      // See https://upstash.com/docs/vector/features/filtering
+      const result = await this.upstashIndex.delete({
+        filter: `documentId = '${documentId}'`,
+      });
+      console.log(
+        `Upstash: deleted ${result.deleted} vector(s) for document ${documentId}`,
+      );
+      return { success: true, count: result.deleted };
+    } catch (error) {
+      console.error('Upstash delete error:', error);
+      return { success: false, count: 0 };
+    }
+  }
+
+  async saveVectorEmbeddings(chunks: string[], vectors: number[][], documentId: string, fileName: string) {
     const dataToUpsert = chunks.map((text, index) => ({
       id: `chunk-${Date.now()}-${index}`,
       vector: vectors[index],
-      metadata: { text }
+      metadata: { text, documentId, fileName }
     }));
 
     await this.upstashIndex.upsert(dataToUpsert);

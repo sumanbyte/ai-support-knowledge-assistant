@@ -131,7 +131,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteResponseDto"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -835,6 +842,100 @@
         "type": "object",
         "properties": {}
       },
+      "DocumentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "publicId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "dept": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PROCESSING",
+              "INDEXED",
+              "ERROR"
+            ],
+            "default": "PROCESSING"
+          },
+          "chunks": {
+            "type": "number"
+          },
+          "icon": {
+            "type": "string",
+            "enum": [
+              "PICTURE_AS_PDF",
+              "DESCRIPTION",
+              "MARKDOWN",
+              "CODE",
+              "SLIDESHOW",
+              "YAML"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "publicId",
+          "name",
+          "size",
+          "dept",
+          "chunks",
+          "icon",
+          "url",
+          "updatedAt",
+          "userId"
+        ]
+      },
+      "DeleteResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Success"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message"
+          },
+          "data": {
+            "description": "Data",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "data"
+        ]
+      },
       "CreateChatDto": {
         "type": "object",
         "properties": {}
@@ -950,70 +1051,6 @@
       "CreateDocumentDto": {
         "type": "object",
         "properties": {}
-      },
-      "DocumentDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "size": {
-            "type": "string"
-          },
-          "dept": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "PROCESSING",
-              "INDEXED",
-              "ERROR"
-            ],
-            "default": "PROCESSING"
-          },
-          "chunks": {
-            "type": "number"
-          },
-          "icon": {
-            "type": "string",
-            "enum": [
-              "PICTURE_AS_PDF",
-              "DESCRIPTION",
-              "MARKDOWN",
-              "CODE",
-              "SLIDESHOW",
-              "YAML"
-            ]
-          },
-          "url": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "userId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "size",
-          "dept",
-          "chunks",
-          "icon",
-          "url",
-          "updatedAt",
-          "userId"
-        ]
       },
       "DocumentResponseDto": {
         "type": "object",

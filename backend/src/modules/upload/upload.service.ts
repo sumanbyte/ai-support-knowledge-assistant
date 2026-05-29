@@ -5,6 +5,8 @@ import { CreateUploadDto } from './dto/create-upload.dto';
 import { UpdateUploadDto } from './dto/update-upload.dto';
 import { PrismaService } from '../auth/prisma/prisma.service';
 import { DocumentIcon, DocumentStatus, User } from '@/generated/prisma/client';
+import { VectorService } from '../vector/vector.service';
+import { DocumentResponseDto } from '@/generated/api-dtos';
 
 @Injectable()
 export class UploadService {
@@ -13,6 +15,7 @@ export class UploadService {
     private readonly cloudinaryService: CloudinaryService,
 
     private readonly prismaService: PrismaService,
+    private readonly vectorService: VectorService
   ) { }
 
   async create(_createUploadDto: CreateUploadDto, file: Express.Multer.File, user: Omit<User, 'password'>) {
@@ -32,6 +35,7 @@ export class UploadService {
     const document = await this.prismaService.document.create({
       data: {
         name: file.originalname,
+        publicId: stored.publicId,
         url: stored.secureUrl,
         userId: user.id,
         size: `${size} MB`,
@@ -83,7 +87,22 @@ export class UploadService {
     return `This action updates a #${id} upload`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} upload`;
+  async remove(id: string, publicId: string) {
+
+    const deletedDocument = await this.prismaService.$transaction(async (tx) => {
+      const document = await tx.document.delete({
+        where: { id },
+      });
+      await this.vectorService.deleteVectorEmbeddings(id);
+      await this.cloudinaryService.deleteFile(publicId);
+
+      return document
+    })
+
+    return {
+      success: true,
+      message: 'Document deleted successfully',
+      data: deletedDocument
+    }
   }
 }

@@ -1,3 +1,5 @@
+import type { DocumentDto } from "../api";
+
 export const RECENT_CHATS = [
   {
     id: '1',
@@ -151,6 +153,8 @@ export const DEMO_DOCUMENTS = [
     iconColor: 'text-secondary bg-secondary/10 border-secondary/20',
   },
 ];
+
+
 
 export const SEED_CHAT_MESSAGES = [
   {

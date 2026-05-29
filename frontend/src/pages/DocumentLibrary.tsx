@@ -5,26 +5,18 @@ import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
 import { useApi } from '../hooks/useApi';
 import { documentService } from '../services/documentService';
-import type { DocumentIcon, DocumentResponseDto, DocumentStatus, UploadResponseDto } from '../api';
+import type { DeleteResponseDto, DocumentDto, DocumentIcon, DocumentResponseDto, DocumentStatus, UploadResponseDto } from '../api';
 import { uploadService } from '../services/uploadService';
 import { toast } from 'sonner';
 import { useError } from '../hooks/useError';
 import { useLoading } from '../hooks/useLoading';
+import type { GenericResponse } from '../types/types';
+import { DeleteModal } from '../components/modals/DeleteModal';
+import { formatRelativeTime } from '../utils/format-time';
 
 type ViewMode = 'grid' | 'list';
 
-type LibraryDocument = {
-  id: string;
-  name: string;
-  fullName: string;
-  size: string;
-  dept: string;
-  status: DocumentStatus;
-  chunks: number;
-  synced: string;
-  icon: string;
-  iconColor: string;
-};
+
 
 const ICON_TO_MATERIAL: Record<DocumentIcon, string> = {
   PICTURE_AS_PDF: 'picture_as_pdf',
@@ -37,25 +29,23 @@ const ICON_TO_MATERIAL: Record<DocumentIcon, string> = {
 
 function toLibraryDocument(
   doc: DocumentResponseDto['documents'][number],
-): LibraryDocument {
-  return {
-    id: doc.id ?? '',
-    name: doc.name,
-    fullName: doc.name,
-    size: doc.size,
-    dept: doc.dept,
-    status: doc.status ?? 'PROCESSING',
-    chunks: doc.chunks,
-    icon: ICON_TO_MATERIAL[doc.icon] ?? 'description',
-    iconColor: 'text-[#ff3b30] bg-[#ff3b30]/10 border-[#ff3b30]/20',
-    synced: 'Just now',
-  };
+): DocumentDto {
+  return doc;
 }
+
+export const ICON_TO_COLOR: Record<DocumentDto['icon'], string> = {
+  PICTURE_AS_PDF: 'text-[#ff3b30] bg-[#ff3b30]/10 border-[#ff3b30]/20',
+  DESCRIPTION: 'text-[#007aff] bg-[#007aff]/10 border-[#007aff]/20',
+  MARKDOWN: 'text-on-surface-variant bg-on-surface-variant/10 border-on-surface-variant/20',
+  CODE: 'text-secondary bg-secondary/10 border-secondary/20',
+  SLIDESHOW: 'text-tertiary bg-tertiary/10 border-tertiary/20',
+  YAML: 'text-primary bg-primary/10 border-primary/20',
+};
 
 
 
 export const DocumentLibrary: React.FC = () => {
-  const [documents, setDocuments] = useState<LibraryDocument[]>([]);
+  const [documents, setDocuments] = useState<DocumentDto[]>([]);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -66,6 +56,9 @@ export const DocumentLibrary: React.FC = () => {
     documentService.getAllDocuments,
   );
 
+  const { data: deleteData, execute: deleteExecute, loading: deleteLoading, error: deleteError } = useApi<DeleteResponseDto, [string, string]>(
+    (id: string, publicId: string) => uploadService.deleteFile(id, publicId),
+  );
   const {
     data: uploadData,
     error: uploadError,
@@ -81,10 +74,19 @@ export const DocumentLibrary: React.FC = () => {
 
 
   useError(uploadError);
+  useError(deleteError);
+
   const uploadingFile = uploadVariables?.[0];
   useLoading(
     uploadLoading,
     uploadingFile ? `Uploading ${uploadingFile.name}...` : 'Uploading file...',
+  );
+
+  useLoading(
+    deleteLoading,
+    selected.size > 1
+      ? `Deleting ${selected.size} documents...`
+      : 'Deleting document...',
   );
 
 
@@ -97,6 +99,18 @@ export const DocumentLibrary: React.FC = () => {
       execute()
     }
   }, [uploadData]);
+
+  useEffect(() => {
+    if (!deleteData?.success) return;
+    toast.success(deleteData.message);
+    setDocuments((prev) => prev.filter((d) => d.id !== deleteData.data.id));
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.delete(`${deleteData.data.id}:${deleteData.data.publicId}`);
+      return next;
+    });
+    execute();
+  }, [deleteData, execute]);
 
   useEffect(() => {
     if (data?.documents) {
@@ -131,28 +145,59 @@ export const DocumentLibrary: React.FC = () => {
     [documents, search]
   );
 
-  const toggleSelect = (id: string) => {
+  const toggleSelect = (id: string, publicId: string) => {
+    console.log(id, publicId);
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      const identifier = `${id}:${publicId}`;
+      if (next.has(identifier)) {
+        next.delete(identifier);
+      } else {
+        next.add(identifier);
+      }
       return next;
     });
   };
 
   const toggleAll = () => {
     if (selected.size === filtered.length) setSelected(new Set());
-    else setSelected(new Set(filtered.map((d) => d.id)));
+    else setSelected(new Set(filtered.map((d) => `${d.id}:${d.publicId}`)));
   };
 
   const handleUpload = (file: File) => {
     uploadExecute(file);
 
     if (fileInputRef.current) {
-      fileInputRef.current.value = null;
+      fileInputRef.current.value = '';
     }
 
   };
+
+  const handleDeleteConfirm = () => {
+    const identifiers = Array.from(selected);
+    identifiers.forEach((identifier) => {
+      const [id, publicId] = identifier.split(':');
+      void deleteExecute(id, publicId);
+    });
+  };
+
+  const deleteDescription =
+    selected.size === 0 ? (
+      'Select documents to delete.'
+    ) : selected.size === 1 ? (
+      <>
+        Permanently remove{' '}
+        <strong className="text-on-surface">
+          {documents.find((d) => selected.has(`${d.id}:${d.publicId}`))?.name ?? 'this document'}
+        </strong>
+        ? This cannot be undone.
+      </>
+    ) : (
+      <>
+        Permanently delete <strong className="text-on-surface">{selected.size}</strong>{' '}
+        selected documents? This cannot be undone.
+      </>
+    );
 
   const statusBadge = (status: DocumentStatus) => {
     if (status === 'INDEXED')
@@ -220,14 +265,25 @@ export const DocumentLibrary: React.FC = () => {
               Select All
             </label>
             <div className="h-4 w-px bg-white/10" />
-            <button
-              type="button"
-              disabled={selected.size === 0}
-              className="text-on-surface-variant hover:text-error flex items-center gap-1 text-sm disabled:opacity-40"
-            >
-              <Icon name="delete" size={18} />
-              Delete
-            </button>
+            <DeleteModal
+              dialogId="library-delete-dialog"
+              title={
+                selected.size <= 1 ? 'Delete document?' : `Delete ${selected.size} documents?`
+              }
+              description={deleteDescription}
+              onConfirm={handleDeleteConfirm}
+              confirmDisabled={selected.size === 0}
+              trigger={
+                <button
+                  type="button"
+                  disabled={selected.size === 0}
+                  className="text-on-surface-variant hover:text-error flex items-center gap-1 text-sm disabled:opacity-40"
+                >
+                  <Icon name="delete" size={18} />
+                  Delete
+                </button>
+              }
+            />
             <button
               type="button"
               disabled={selected.size === 0}
@@ -279,65 +335,67 @@ export const DocumentLibrary: React.FC = () => {
               : 'flex flex-col gap-3'
           }
         >
-          {filtered.map((doc) => (
-            <div
-              key={doc.id}
-              className="glass-panel rounded-xl p-4 flex flex-col gap-4 relative group hover:border-primary/30 transition-all duration-300"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none" />
-              <div className="flex items-start justify-between relative z-10 gap-2">
-                <div className="flex items-start gap-3 min-w-0">
-                  <input
-                    type="checkbox"
-                    className="custom-checkbox mt-1 shrink-0"
-                    checked={selected.has(doc.id)}
-                    onChange={() => toggleSelect(doc.id)}
-                  />
-                  <div
-                    className={`w-10 h-10 rounded flex items-center justify-center border shrink-0 ${doc.iconColor}`}
-                  >
-                    <Icon name={doc.icon} size={22} />
-                  </div>
-                  <div className="min-w-0">
-                    <h3
-                      className="text-on-surface font-medium truncate text-base"
-                      title={doc.fullName}
+          {filtered.map((doc) => {
+            return (
+              <div
+                key={doc.id}
+                className="glass-panel rounded-xl p-4 flex flex-col gap-4 relative group hover:border-primary/30 transition-all duration-300"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl pointer-events-none" />
+                <div className="flex items-start justify-between relative z-10 gap-2">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <input
+                      type="checkbox"
+                      className="custom-checkbox mt-1 shrink-0"
+                      checked={selected.has(`${doc.id}:${doc.publicId}`)}
+                      onChange={() => toggleSelect(doc.id, doc.publicId)}
+                    />
+                    <div
+                      className={`w-10 h-10 rounded flex items-center justify-center border shrink-0 `}
                     >
-                      {doc.name}
-                    </h3>
-                    <p className="text-on-surface-variant text-sm mt-0.5">
-                      {doc.size} • {doc.dept}
-                    </p>
+                      <Icon name={doc.icon} size={22} />
+                    </div>
+                    <div className="min-w-0">
+                      <h3
+                        className="text-on-surface font-medium truncate text-base"
+                        title={doc.name}
+                      >
+                        {doc.name}
+                      </h3>
+                      <p className="text-on-surface-variant text-sm mt-0.5">
+                        {doc.size} • {doc.dept}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="text-on-surface-variant hover:text-on-surface opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                  >
+                    <Icon name="more_vert" size={20} />
+                  </button>
+                </div>
+                <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between relative z-10 flex-wrap gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {statusBadge(doc.status)}
+                    {doc.status === 'INDEXED' && (
+                      <span className="font-label-sm text-on-surface-variant bg-surface-dim px-2 py-0.5 rounded-full border border-white/5">
+                        {doc.chunks.toLocaleString()} chunks
+                      </span>
+                    )}
+                    {doc.status === 'PROCESSING' && (
+                      <span className="font-label-sm text-on-surface-variant bg-surface-dim px-2 py-0.5 rounded-full border border-white/5">
+                        Parsing...
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 text-on-surface-variant text-xs">
+                    {doc.status === 'INDEXED' && <Icon name="sync" size={14} />}
+                    {formatRelativeTime(doc.createdAt)}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="text-on-surface-variant hover:text-on-surface opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                >
-                  <Icon name="more_vert" size={20} />
-                </button>
               </div>
-              <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between relative z-10 flex-wrap gap-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  {statusBadge(doc.status)}
-                  {doc.status === 'INDEXED' && (
-                    <span className="font-label-sm text-on-surface-variant bg-surface-dim px-2 py-0.5 rounded-full border border-white/5">
-                      {doc.chunks.toLocaleString()} chunks
-                    </span>
-                  )}
-                  {doc.status === 'PROCESSING' && (
-                    <span className="font-label-sm text-on-surface-variant bg-surface-dim px-2 py-0.5 rounded-full border border-white/5">
-                      Parsing...
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 text-on-surface-variant text-xs">
-                  {doc.status === 'INDEXED' && <Icon name="sync" size={14} />}
-                  {doc.synced}
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Upload drop zone */}
