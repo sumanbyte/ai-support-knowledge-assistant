@@ -88,13 +88,13 @@ export class UploadService {
     return `This action updates a #${id} upload`;
   }
 
-  async remove(id: string, publicId: string) {
+  async remove(id: string, publicId: string, userId: string) {
 
     const deletedDocument = await this.prismaService.$transaction(async (tx) => {
       const document = await tx.document.delete({
         where: { id },
       });
-      await this.vectorService.deleteVectorEmbeddings(id);
+      await this.vectorService.deleteVectorEmbeddings(id, userId);
       await this.cloudinaryService.deleteFile(publicId);
 
       return document

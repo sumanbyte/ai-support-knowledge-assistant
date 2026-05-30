@@ -110,6 +110,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Ask the assistant a question
+         * @description Ask the assistant a question and get a response
+         */
         post: operations["ChatController_askAssistant"];
         delete?: never;
         options?: never;
@@ -467,6 +471,10 @@ export interface components {
         };
         CreateChatDto: Record<string, never>;
         UpdateChatDto: Record<string, never>;
+        ChatResponseDto: {
+            success: boolean;
+            response: string;
+        };
         CreateUserDto: Record<string, never>;
         UpdateUserDto: Record<string, never>;
         SignupDto: {
@@ -760,11 +768,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ChatResponseDto"];
+                };
             };
         };
     };

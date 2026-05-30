@@ -49,7 +49,11 @@ export class UploadController {
 
   @Delete(':id')
   @ApiOkResponse({ type: DeleteResponseDto })
-  async remove(@Param('id') id: string, @Body("public_id") publicId: string) {
-    return this.uploadService.remove(id, publicId);
+  async remove(
+    @Param('id') id: string,
+    @Body("public_id") publicId: string,
+    @GetUser("id") userId: string
+  ) {
+    return this.uploadService.remove(id, publicId, userId);
   }
 }

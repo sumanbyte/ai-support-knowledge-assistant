@@ -54,7 +54,7 @@ export class AnalyticsService {
       averageRelevanceScore,
       dimension: indexInfo.dimension,
       namespaces: Object.keys(indexInfo.namespaces).length,
-      uptimePercentage,
+      uptimePercentage: uptimePercentage.toFixed(0),
       averageQueryLatency
     }
   }

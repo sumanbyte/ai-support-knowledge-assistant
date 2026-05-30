@@ -5,18 +5,19 @@ import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
 import { useAppNavigate } from '../hooks/useAppNavigate';
 import { useApi } from '../hooks/useApi';
-import type { DocumentAnalyticsResponseDto } from '../api';
+import type { DocumentAnalyticsResponseDto, DocumentResponseDto } from '../api';
 import { analyticsService } from '../services/analyticsService';
+import { documentService } from '../services/documentService';
+import { formatRelativeTime } from '../utils/format-time';
 
-const ENTRIES = [
-  { id: '1', title: 'API Authentication Overview', category: 'API Reference', chunks: 12, updated: 'May 24', score: 94 },
-  { id: '2', title: 'Document Processing Pipeline', category: 'Architecture', chunks: 18, updated: 'May 23', score: 87 },
-  { id: '3', title: 'Vector Embeddings Guide', category: 'ML/AI', chunks: 9, updated: 'May 22', score: 92 },
-  { id: '4', title: 'User Management & Roles', category: 'Administration', chunks: 7, updated: 'May 21', score: 79 },
-  { id: '5', title: 'RAG Implementation Details', category: 'Architecture', chunks: 15, updated: 'May 20', score: 88 },
-];
-
-const CATEGORIES = ['All', 'API Reference', 'Architecture', 'ML/AI', 'Administration'];
+type KnowledgeEntry = {
+  id: string;
+  title: string;
+  category: string;
+  chunks: number;
+  updated: string;
+  score: number;
+};
 
 export const KnowledgeBase: React.FC = () => {
   const navigate = useAppNavigate();
@@ -30,8 +31,26 @@ export const KnowledgeBase: React.FC = () => {
   const [namespaces, setNamespaces] = useState(0);
   const [uptimePercentage, setUptimePercentage] = useState(0);
   const [averageQueryLatency, setAverageQueryLatency] = useState(0);
+  const [documents, setDocuments] = useState<KnowledgeEntry[]>([]);
+
   const { data: analyticsData, execute: executeAnalytics } =
     useApi<DocumentAnalyticsResponseDto, []>(analyticsService.getDocumentsAnalytics);
+
+  const { data: documentData, execute: fetchDocuments } = useApi<DocumentResponseDto, []>(documentService.getAllDocuments);
+
+  useEffect(() => {
+    if (documentData) {
+      const entries: KnowledgeEntry[] = documentData.documents.map((d) => ({
+        id: d.id ?? '',
+        title: d.name,
+        category: d.dept,
+        chunks: d.chunks,
+        updated: d.updatedAt,
+        score: 0,
+      }));
+      setDocuments(entries);
+    }
+  }, [documentData]);
 
   useEffect(() => {
     if (analyticsData) {
@@ -47,17 +66,23 @@ export const KnowledgeBase: React.FC = () => {
 
   useEffect(() => {
     executeAnalytics();
-  }, []);
+    fetchDocuments();
+  }, [executeAnalytics, fetchDocuments]);
+
+  const categories = useMemo(
+    () => ['All', ...new Set(documents.map((d) => d.category))],
+    [documents],
+  );
 
   const filtered = useMemo(
     () =>
-      ENTRIES.filter((e) => {
+      documents.filter((e) => {
         const q = search.toLowerCase();
         const matchQ = e.title.toLowerCase().includes(q) || e.category.toLowerCase().includes(q);
         const matchC = category === 'All' || e.category === category;
         return matchQ && matchC;
       }),
-    [search, category]
+    [documents, search, category],
   );
 
   return (
@@ -70,6 +95,7 @@ export const KnowledgeBase: React.FC = () => {
             <button
               type="button"
               className="bg-primary text-on-primary px-4 py-2 rounded-lg flex items-center gap-2 font-semibold shadow-[0_0_15px_rgba(221,183,255,0.2)] active:scale-95 transition-transform"
+              onClick={() => navigate('documents')}
             >
               <Icon name="add" size={18} />
               New Entry
@@ -91,7 +117,7 @@ export const KnowledgeBase: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat}
               type="button"
@@ -102,7 +128,7 @@ export const KnowledgeBase: React.FC = () => {
                 }`}
             >
               {cat}
-              {cat === 'All' && ` (${ENTRIES.length})`}
+              {cat === 'All' && ` (${documents.length})`}
             </button>
           ))}
         </div>
@@ -143,7 +169,7 @@ export const KnowledgeBase: React.FC = () => {
                   </div>
                   <div className="flex gap-4 font-label-sm text-on-surface-variant">
                     <span>{entry.chunks} chunks</span>
-                    <span>Updated {entry.updated}</span>
+                    <span>Updated {formatRelativeTime(entry.updated)}</span>
                   </div>
                 </div>
                 <div className="text-right shrink-0">

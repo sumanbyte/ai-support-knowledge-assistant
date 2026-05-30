@@ -43,12 +43,15 @@ export class VectorService {
     return info;
   }
 
-  async deleteVectorEmbeddings(documentId: string) {
+  async deleteVectorEmbeddings(documentId: string, userId: string) {
     try {
       // Metadata fields are filtered by key name directly (not "metadata.documentId").
       // See https://upstash.com/docs/vector/features/filtering
       const result = await this.upstashIndex.delete({
         filter: `documentId = '${documentId}'`,
+
+      }, {
+        namespace: userId
       });
       console.log(
         `Upstash: deleted ${result.deleted} vector(s) for document ${documentId}`,
@@ -75,12 +78,19 @@ export class VectorService {
   }
 
   async searchSimilarChunks(queryVector: number[], topK: number, userId: string) {
+
+    console.log("Searching for similar chunks for user:", userId);
+
+    // Add this temporarily inside askAssistant or searchSimilarChunks
+    const activeNamespaces = await this.upstashIndex.listNamespaces();
+    console.log("Current active partitions inside Upstash:", activeNamespaces);
     try {
-      const results = await this.upstashIndex.query({
+      const results = await this.upstashIndex.namespace(userId).query({
         vector: queryVector,
         topK: topK,
-        includeMetadata: true
+        includeMetadata: true,
       });
+
 
 
       return results.map(match => ({

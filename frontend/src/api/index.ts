@@ -23,3 +23,4 @@ export type UploadResponseDto = components['schemas']['UploadResponseDto'];
 export type DeleteResponseDto = components['schemas']['DeleteResponseDto'];
 export type DocumentAnalyticsResponseDto =
   components['schemas']['DocumentAnalyticsResponseDto'];
+export type ChatResponseDto = components['schemas']['ChatResponseDto'];

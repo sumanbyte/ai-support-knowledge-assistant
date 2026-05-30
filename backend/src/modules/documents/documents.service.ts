@@ -73,7 +73,7 @@ export class DocumentsService {
       }
 
       // Clear any prior chunks for this document (retries / re-process).
-      await this.vectorService.deleteVectorEmbeddings(documentId);
+      await this.vectorService.deleteVectorEmbeddings(documentId, userId);
 
       const parser = new PDFParse({ data: buffer });
       const pdfData = await parser.getText();
@@ -96,7 +96,6 @@ export class DocumentsService {
         },
       })
 
-      console.log(savedEmbeddings);
 
       return {
         message: 'Document processed.',

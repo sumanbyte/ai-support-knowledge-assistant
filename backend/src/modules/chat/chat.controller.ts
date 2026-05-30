@@ -1,11 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 import { GetUser } from '../auth/decorators/current-user.decorator';
 import { User } from '@/generated/prisma/client';
+import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { ChatResponseDto } from './dto/chat-response-dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 
 @Controller('chat')
+@UseGuards(JwtAuthGuard)
 export class ChatController {
   constructor(private readonly chatService: ChatService) { }
 
@@ -34,8 +38,12 @@ export class ChatController {
     return this.chatService.remove(+id);
   }
 
+
+  @ApiOkResponse({ type: ChatResponseDto })
+  @ApiOperation({ summary: 'Ask the assistant a question', description: 'Ask the assistant a question and get a response' })
   @Post("ask-assistant")
-  askAssistant(@Body("userQuestion") userQuestion: string,
+  askAssistant(
+    @Body("userQuestion") userQuestion: string,
     @GetUser() user: Omit<User, 'password'>
   ) {
     return this.chatService.askAssistant(userQuestion, user.id)

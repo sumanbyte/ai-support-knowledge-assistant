@@ -33,10 +33,15 @@ export class ChatService {
   }
 
   async askAssistant(userQuestion: string, userId: string) {
+    console.log("Asking assistant for user:", userId);
     const [queryEmbedding] = await this.embeddingService.generateEmbeddings([userQuestion]);
 
     const contextChunks = await this.vectorService.searchSimilarChunks(queryEmbedding, 3, userId);
 
+    console.log("Is queryEmbedding an array?", Array.isArray(queryEmbedding));
+    console.log("Query Embedding Dimensions Count:", queryEmbedding?.length);
+
+    console.log("Context chunks:", contextChunks);
     const contextText = contextChunks.map(c => c.text).join("\n\n");
 
     const response = await this.ragService.generateResponse(contextText)

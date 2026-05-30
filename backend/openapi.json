@@ -259,13 +259,22 @@
     },
     "/chat/ask-assistant": {
       "post": {
+        "description": "Ask the assistant a question and get a response",
         "operationId": "ChatController_askAssistant",
         "parameters": [],
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponseDto"
+                }
+              }
+            }
           }
         },
+        "summary": "Ask the assistant a question",
         "tags": [
           "Chat"
         ]
@@ -1075,6 +1084,21 @@
       "UpdateChatDto": {
         "type": "object",
         "properties": {}
+      },
+      "ChatResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "response": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "response"
+        ]
       },
       "CreateUserDto": {
         "type": "object",

@@ -5,6 +5,10 @@ import { RagSourcePanel } from '../components/chat/RagSourcePanel';
 import { AppShell } from '../components/Layout';
 import { Icon } from '../components/UI/Icon';
 import { CHAT_SUGGESTIONS, SEED_CHAT_MESSAGES } from '../data/mockData';
+import { useApi } from '../hooks/useApi';
+import { chatService } from '../services/chatService';
+import type { ChatResponseDto } from '../api';
+import { useError } from '../hooks/useError';
 async function fetchAssistantReply(question: string): Promise<string | null> {
   try {
     const res = await fetch('http://localhost:3000/chat/ask-assistant', {
@@ -30,6 +34,12 @@ export const ChatPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const { data: chatData, execute: sendQuestion, error: chatError } = useApi<ChatResponseDto, [string]>(
+    (userQuestion: string) => chatService.askAssistant(userQuestion)
+  );
+
+  useError(chatError);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
@@ -38,6 +48,10 @@ export const ChatPage: React.FC = () => {
   const handleSend = async (text?: string) => {
     const content = (text ?? inputValue).trim();
     if (!content || isLoading) return;
+
+    sendQuestion(content);
+
+    return;
 
     const userMsg: ChatMsg = {
       id: Date.now().toString(),

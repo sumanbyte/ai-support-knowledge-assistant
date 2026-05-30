@@ -3,6 +3,8 @@ import { RAG_SOURCES } from '../../data/mockData';
 import { Icon } from '../UI/Icon';
 
 export const RagSourcePanel: React.FC = () => {
+
+
   return (
     <aside className="hidden lg:flex flex-col w-[360px] xl:w-[400px] h-full border-l border-outline-variant/10 bg-surface/50 shrink-0">
       <div className="shrink-0 h-[var(--layout-topbar-height)] px-6 border-b border-outline-variant/10 flex items-center">
@@ -19,11 +21,10 @@ export const RagSourcePanel: React.FC = () => {
         {RAG_SOURCES.map((source, index) => (
           <div
             key={source.id}
-            className={`glass-panel rounded-xl p-4 cursor-pointer group transition-all hover:border-primary/25 border-l-[3px] ${
-              index === 0
+            className={`glass-panel rounded-xl p-4 cursor-pointer group transition-all hover:border-primary/25 border-l-[3px] ${index === 0
                 ? 'border-l-primary bg-primary/[0.03]'
                 : 'border-l-transparent hover:border-l-primary/40'
-            }`}
+              }`}
           >
             <div className="flex items-start justify-between gap-2 mb-2.5">
               <div className="flex items-center gap-1.5 text-primary text-sm font-medium truncate min-w-0">
