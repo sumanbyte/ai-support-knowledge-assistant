@@ -15,6 +15,7 @@ export interface ProcessDocumentInput {
   fileName?: string;
   cloudinaryUrl?: string;
   publicId?: string;
+  userId: string;
 }
 
 @Injectable()
@@ -38,6 +39,7 @@ export class DocumentsService {
       ...row,
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
+      size: row.size.toString(),
     }));
     return { documents };
   }
@@ -56,7 +58,7 @@ export class DocumentsService {
   }
 
   async processDocument(input: ProcessDocumentInput) {
-    const { buffer, fileName, cloudinaryUrl, publicId, documentId } = input;
+    const { buffer, fileName, cloudinaryUrl, publicId, documentId, userId } = input;
     try {
       if (!documentId) {
         throw new BadRequestException('Document ID is required to process the document');
@@ -82,7 +84,8 @@ export class DocumentsService {
         chunks,
         embeddings,
         documentId,
-        fileName ?? 'unknown'
+        fileName ?? 'unknown',
+        userId
       );
 
       await this.prismaService.document.update({

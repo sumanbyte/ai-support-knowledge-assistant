@@ -55,6 +55,7 @@ export class UploadService {
           cloudinaryUrl: stored.secureUrl,
           publicId: stored.publicId,
           documentId: document.id,
+          userId: user.id,
         })
         .catch((err) => {
           console.error('Document processing failed:', err);

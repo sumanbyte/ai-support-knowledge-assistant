@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { CreateAnalyticsDto } from './dto/create-analytics.dto';
 import { UpdateAnalyticsDto } from './dto/update-analytics.dto';
 import { PrismaService } from '../auth/prisma/prisma.service';
+import { VectorService } from '../vector/vector.service';
 
 @Injectable()
 export class AnalyticsService {
 
 
-  constructor(private readonly prismaService: PrismaService) { }
+  constructor(private readonly prismaService: PrismaService, private readonly vectorService: VectorService) { }
 
   create(createAnalyticsDto: CreateAnalyticsDto) {
     return 'This action adds a new analytics';
@@ -30,8 +31,7 @@ export class AnalyticsService {
   }
 
   async getDocumentsAnalytics(userId: string) {
-
-    const [totalDocuments, indexSize] = await Promise.all([
+    const [totalDocuments, indexSize, indexInfo, uptimePercentage, averageQueryLatency] = await Promise.all([
       this.prismaService.document.count({
         where: { userId }
       }),
@@ -40,7 +40,10 @@ export class AnalyticsService {
         _sum: {
           size: true
         }
-      })
+      }),
+      this.vectorService.getIndexInfo(),
+      this.vectorService.getUptimePercentage(),
+      this.vectorService.getAverageQueryLatency()
     ])
 
     const averageRelevanceScore = 0
@@ -48,7 +51,11 @@ export class AnalyticsService {
     return {
       totalDocuments,
       indexSize: indexSize._sum.size,
-      averageRelevanceScore
+      averageRelevanceScore,
+      dimension: indexInfo.dimension,
+      namespaces: Object.keys(indexInfo.namespaces).length,
+      uptimePercentage,
+      averageQueryLatency
     }
   }
 }

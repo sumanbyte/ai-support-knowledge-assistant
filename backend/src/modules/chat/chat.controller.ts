@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
+import { GetUser } from '../auth/decorators/current-user.decorator';
+import { User } from '@/generated/prisma/client';
 
 @Controller('chat')
 export class ChatController {
@@ -33,7 +35,9 @@ export class ChatController {
   }
 
   @Post("ask-assistant")
-  askAssistant(@Body("userQuestion") userQuestion: string) {
-    return this.chatService.askAssistant(userQuestion)
+  askAssistant(@Body("userQuestion") userQuestion: string,
+    @GetUser() user: Omit<User, 'password'>
+  ) {
+    return this.chatService.askAssistant(userQuestion, user.id)
   }
 }

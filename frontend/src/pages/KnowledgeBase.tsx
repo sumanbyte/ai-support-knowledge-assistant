@@ -26,7 +26,10 @@ export const KnowledgeBase: React.FC = () => {
   const [totalDocuments, setTotalDocuments] = useState(0);
   const [indexSize, setIndexSize] = useState(0);
   const [averageRelevanceScore, setAverageRelevanceScore] = useState(0);
-
+  const [dimension, setDimension] = useState(0);
+  const [namespaces, setNamespaces] = useState(0);
+  const [uptimePercentage, setUptimePercentage] = useState(0);
+  const [averageQueryLatency, setAverageQueryLatency] = useState(0);
   const { data: analyticsData, execute: executeAnalytics } =
     useApi<DocumentAnalyticsResponseDto, []>(analyticsService.getDocumentsAnalytics);
 
@@ -35,6 +38,10 @@ export const KnowledgeBase: React.FC = () => {
       setTotalDocuments(analyticsData.totalDocuments);
       setIndexSize(analyticsData.indexSize);
       setAverageRelevanceScore(analyticsData.averageRelevanceScore);
+      setDimension(analyticsData.dimension);
+      setNamespaces(analyticsData.namespaces);
+      setUptimePercentage(analyticsData.uptimePercentage);
+      setAverageQueryLatency(analyticsData.averageQueryLatency);
     }
   }, [analyticsData]);
 
@@ -176,10 +183,10 @@ export const KnowledgeBase: React.FC = () => {
           <h3 className="text-headline-md text-on-surface font-medium mb-4">Vector Index Health</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'Dimensions', value: '1536' },
-              { label: 'Query Latency', value: '45ms' },
-              { label: 'Namespaces', value: '12' },
-              { label: 'Uptime', value: '99.9%' },
+              { label: 'Dimensions', value: dimension },
+              { label: 'Query Latency', value: `${averageQueryLatency}ms` },
+              { label: 'Namespaces', value: namespaces },
+              { label: 'Uptime', value: `${uptimePercentage}%` },
             ].map((item) => (
               <div
                 key={item.label}

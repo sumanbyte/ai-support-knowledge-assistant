@@ -440,7 +440,7 @@ export interface components {
             id?: string;
             publicId: string;
             name: string;
-            size: number;
+            size: string;
             dept: string;
             /**
              * @default PROCESSING
@@ -510,6 +510,10 @@ export interface components {
             totalDocuments: number;
             indexSize: number;
             averageRelevanceScore: number;
+            dimension: number;
+            namespaces: number;
+            uptimePercentage: number;
+            averageQueryLatency: number;
         };
         UpdateAnalyticsDto: Record<string, never>;
     };

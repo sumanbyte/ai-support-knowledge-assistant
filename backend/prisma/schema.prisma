@@ -65,3 +65,17 @@ model Document {
   @@index([userId])
   @@map("documents")
 }
+
+model RagMetrics {
+  id      String  @id @default(uuid())
+  success Boolean
+
+  type String @default("heartbeat")
+
+  queryLatencyMS Float?   @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([createdAt])
+  @@map("rag_metrics")
+}

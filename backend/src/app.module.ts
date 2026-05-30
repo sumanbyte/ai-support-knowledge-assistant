@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AppConfigModule } from './config/app-config.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AppConfigModule } from './config/app-config.module';
     AuthModule,
     DocumentsModule,
     AnalyticsModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

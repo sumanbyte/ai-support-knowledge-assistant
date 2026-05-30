@@ -32,10 +32,10 @@ export class ChatService {
     return `This action removes a #${id} chat`;
   }
 
-  async askAssistant(userQuestion: string) {
+  async askAssistant(userQuestion: string, userId: string) {
     const [queryEmbedding] = await this.embeddingService.generateEmbeddings([userQuestion]);
 
-    const contextChunks = await this.vectorService.searchSimilarChunks(queryEmbedding, 3);
+    const contextChunks = await this.vectorService.searchSimilarChunks(queryEmbedding, 3, userId);
 
     const contextText = contextChunks.map(c => c.text).join("\n\n");
 

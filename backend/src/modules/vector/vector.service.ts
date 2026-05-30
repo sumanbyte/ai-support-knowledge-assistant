@@ -3,13 +3,15 @@ import { CreateVectorDto } from './dto/create-vector.dto';
 import { UpdateVectorDto } from './dto/update-vector.dto';
 import { Index } from '@upstash/vector';
 import { AppConfig } from 'src/config/app.config';
+import { PrismaService } from '../auth/prisma/prisma.service';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class VectorService {
 
   private upstashIndex: Index;
 
-  constructor(private readonly appConfig: AppConfig) {
+  constructor(private readonly appConfig: AppConfig, private readonly prismaService: PrismaService) {
     this.upstashIndex = new Index({
       url: appConfig.getEnvConfig().UPSTASH_VECTOR_REST_URL,
       token: appConfig.getEnvConfig().UPSTASH_VECTOR_REST_TOKEN
@@ -35,6 +37,12 @@ export class VectorService {
     return `This action removes a #${id} vector`;
   }
 
+  async getIndexInfo() {
+    const info = await this.upstashIndex.info();
+
+    return info;
+  }
+
   async deleteVectorEmbeddings(documentId: string) {
     try {
       // Metadata fields are filtered by key name directly (not "metadata.documentId").
@@ -52,25 +60,28 @@ export class VectorService {
     }
   }
 
-  async saveVectorEmbeddings(chunks: string[], vectors: number[][], documentId: string, fileName: string) {
+  async saveVectorEmbeddings(chunks: string[], vectors: number[][], documentId: string, fileName: string, userId: string) {
     const dataToUpsert = chunks.map((text, index) => ({
       id: `chunk-${Date.now()}-${index}`,
       vector: vectors[index],
       metadata: { text, documentId, fileName }
     }));
 
-    await this.upstashIndex.upsert(dataToUpsert);
+    await this.upstashIndex.upsert(dataToUpsert, {
+      namespace: userId
+    });
     console.log({ success: true, count: dataToUpsert.length })
     return { success: true, count: dataToUpsert.length }
   }
 
-  async searchSimilarChunks(queryVector: number[], topK: number) {
+  async searchSimilarChunks(queryVector: number[], topK: number, userId: string) {
     try {
       const results = await this.upstashIndex.query({
         vector: queryVector,
         topK: topK,
         includeMetadata: true
       });
+
 
       return results.map(match => ({
         id: match.id,
@@ -82,5 +93,63 @@ export class VectorService {
       console.log("Upstash search errror: ", error)
       throw error;
     }
+  }
+
+
+  async getUptimePercentage() {
+    const totalHeartbeats = await this.prismaService.ragMetrics.count({
+      where: {
+        type: "heartbeat"
+      }
+    })
+    const successfulHeartbeats = await this.prismaService.ragMetrics.count({
+      where: {
+        type: "heartbeat",
+        success: true
+      }
+    })
+    return (successfulHeartbeats / totalHeartbeats) * 100;
+  }
+
+  async getAverageQueryLatency() {
+    const averageQueryLatency = await this.prismaService.ragMetrics.aggregate({
+      where: {
+        type: "heartbeat",
+        success: true
+      },
+      _avg: {
+        queryLatencyMS: true
+      }
+    })
+    return averageQueryLatency._avg.queryLatencyMS?.toFixed(0);
+  }
+
+
+
+  @Cron('*/5 * * * * *') // every 5 minutes
+  async checkSystemUptimePercentage() {
+    const start = performance.now();
+    try {
+      await this.upstashIndex.info();
+
+
+
+
+      await this.prismaService.ragMetrics.create({
+        data: {
+          success: true,
+          type: "heartbeat",
+          queryLatencyMS: performance.now() - start,
+        }
+      })
+    } catch (error) {
+      await this.prismaService.ragMetrics.create({
+        data: {
+          success: false,
+        }
+      })
+    }
+
+
   }
 }

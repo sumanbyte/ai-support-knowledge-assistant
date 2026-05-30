@@ -8,6 +8,14 @@ export class DocumentAnalyticsResponseDto {
     indexSize: number;
     @ApiProperty({ type: Number })
     averageRelevanceScore: number;
+    @ApiProperty({ type: Number })
+    dimension: number;
+    @ApiProperty({ type: Number })
+    namespaces: number;
+    @ApiProperty({ type: Number })
+    uptimePercentage: number;
+    @ApiProperty({ type: Number })
+    averageQueryLatency: number;
 }
 
 

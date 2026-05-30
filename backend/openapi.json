@@ -987,7 +987,7 @@
             "type": "string"
           },
           "size": {
-            "type": "number"
+            "type": "string"
           },
           "dept": {
             "type": "string"
@@ -1217,12 +1217,28 @@
           },
           "averageRelevanceScore": {
             "type": "number"
+          },
+          "dimension": {
+            "type": "number"
+          },
+          "namespaces": {
+            "type": "number"
+          },
+          "uptimePercentage": {
+            "type": "number"
+          },
+          "averageQueryLatency": {
+            "type": "number"
           }
         },
         "required": [
           "totalDocuments",
           "indexSize",
-          "averageRelevanceScore"
+          "averageRelevanceScore",
+          "dimension",
+          "namespaces",
+          "uptimePercentage",
+          "averageQueryLatency"
         ]
       },
       "UpdateAnalyticsDto": {

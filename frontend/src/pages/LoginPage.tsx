@@ -43,9 +43,14 @@ export const LoginPage: React.FC = () => {
     <AuthLayout>
       {/* Branding above card — Stitch login layout */}
       <div className="mb-10 flex flex-col items-center text-center">
-        <div className="mb-4 h-12 w-12 overflow-hidden rounded-lg">
-          <img alt="Converse AI Logo" className="h-full w-full object-cover" src={CONVERSE_LOGO_URL} />
-        </div>
+        <div className="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center shrink-0"><span className="material-symbols-outlined leading-none text-on-primary-container" aria-hidden="true"
+
+          style={{
+            fontSize: "22px",
+            fontVariationSettings: "FILL 1",
+          }}
+
+        >dataset</span></div>
         <h1 className="font-display text-headline-md font-medium tracking-tight text-on-surface">
           Converse AI
         </h1>

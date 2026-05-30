@@ -6,9 +6,10 @@ import { VectorService } from '../vector/vector.service';
 import { AppConfig } from 'src/config/app.config';
 import { RagService } from '../rag/rag.service';
 import { GeminiService } from '../gemini/gemini.service';
+import { PrismaService } from '../auth/prisma/prisma.service';
 
 @Module({
   controllers: [ChatController],
-  providers: [ChatService, EmbeddingsService, VectorService, AppConfig, RagService, GeminiService],
+  providers: [ChatService, EmbeddingsService, VectorService, AppConfig, RagService, GeminiService, PrismaService],
 })
 export class ChatModule { }
