@@ -48,7 +48,16 @@ export class ChatService {
 
     return {
       success: true,
-      response
+      response,
+      sources: contextChunks.map((chunk, index) => ({
+        citationNumber: index + 1,
+        fileName: chunk.fileName,
+        matchScore: Math.round(chunk.score * 100),
+        cloudinaryUrl: chunk.cloudinaryUrl,
+        documentId: chunk.documentId,
+        snippet: (chunk.text as string).substring(0, 180),
+        numberOfPages: chunk.numberOfPages,
+      }))
     };
   }
 }

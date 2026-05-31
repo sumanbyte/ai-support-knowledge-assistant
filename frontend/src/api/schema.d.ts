@@ -471,9 +471,19 @@ export interface components {
         };
         CreateChatDto: Record<string, never>;
         UpdateChatDto: Record<string, never>;
+        ChatSourceDto: {
+            citationNumber: number;
+            matchScore: number;
+            fileName: string;
+            cloudinaryUrl: string;
+            documentId: string;
+            numberOfPages: number;
+            snippet: string;
+        };
         ChatResponseDto: {
             success: boolean;
             response: string;
+            sources: components["schemas"]["ChatSourceDto"][];
         };
         CreateUserDto: Record<string, never>;
         UpdateUserDto: Record<string, never>;

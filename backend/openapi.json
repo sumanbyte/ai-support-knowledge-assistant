@@ -1085,6 +1085,41 @@
         "type": "object",
         "properties": {}
       },
+      "ChatSourceDto": {
+        "type": "object",
+        "properties": {
+          "citationNumber": {
+            "type": "number"
+          },
+          "matchScore": {
+            "type": "number"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "cloudinaryUrl": {
+            "type": "string"
+          },
+          "documentId": {
+            "type": "string"
+          },
+          "numberOfPages": {
+            "type": "number"
+          },
+          "snippet": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "citationNumber",
+          "matchScore",
+          "fileName",
+          "cloudinaryUrl",
+          "documentId",
+          "numberOfPages",
+          "snippet"
+        ]
+      },
       "ChatResponseDto": {
         "type": "object",
         "properties": {
@@ -1093,11 +1128,18 @@
           },
           "response": {
             "type": "string"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceDto"
+            }
           }
         },
         "required": [
           "success",
-          "response"
+          "response",
+          "sources"
         ]
       },
       "CreateUserDto": {

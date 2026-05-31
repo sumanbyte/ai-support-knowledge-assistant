@@ -77,6 +77,7 @@ export class DocumentsService {
 
       const parser = new PDFParse({ data: buffer });
       const pdfData = await parser.getText();
+      const numberOfPages = pdfData.pages.length;
 
       const chunks = this.chunkingService.chunkText(pdfData.text);
       const embeddings = await this.embeddingService.generateEmbeddings(chunks);
@@ -85,7 +86,9 @@ export class DocumentsService {
         embeddings,
         documentId,
         fileName ?? 'unknown',
-        userId
+        userId,
+        cloudinaryUrl ?? "",
+        numberOfPages
       );
 
       await this.prismaService.document.update({

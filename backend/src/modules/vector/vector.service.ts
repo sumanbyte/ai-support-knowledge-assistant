@@ -63,11 +63,13 @@ export class VectorService {
     }
   }
 
-  async saveVectorEmbeddings(chunks: string[], vectors: number[][], documentId: string, fileName: string, userId: string) {
+  async saveVectorEmbeddings(chunks: string[], vectors: number[][],
+    documentId: string, fileName: string,
+    userId: string, cloudinaryUrl: string, numberOfPages: number) {
     const dataToUpsert = chunks.map((text, index) => ({
       id: `chunk-${Date.now()}-${index}`,
       vector: vectors[index],
-      metadata: { text, documentId, fileName }
+      metadata: { text, documentId, fileName, cloudinaryUrl, numberOfPages }
     }));
 
     await this.upstashIndex.upsert(dataToUpsert, {
@@ -81,9 +83,7 @@ export class VectorService {
 
     console.log("Searching for similar chunks for user:", userId);
 
-    // Add this temporarily inside askAssistant or searchSimilarChunks
-    const activeNamespaces = await this.upstashIndex.listNamespaces();
-    console.log("Current active partitions inside Upstash:", activeNamespaces);
+
     try {
       const results = await this.upstashIndex.namespace(userId).query({
         vector: queryVector,
@@ -97,7 +97,11 @@ export class VectorService {
         id: match.id,
         score: match.score,
         text: match.metadata?.text,
-        ...match.metadata
+        fileName: match.metadata?.fileName,
+        cloudinaryUrl: match.metadata?.cloudinaryUrl,
+        documentId: match.metadata?.documentId,
+        userId: match.metadata?.userId,
+        numberOfPages: match.metadata?.numberOfPages,
       }))
     } catch (error) {
       console.log("Upstash search errror: ", error)

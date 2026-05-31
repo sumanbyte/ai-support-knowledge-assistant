@@ -20,9 +20,10 @@ export const ChatPage: React.FC = () => {
   const [error, setError] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: chatData, execute: sendQuestion, error: chatError, loading: answerLoading } = useApi<ChatResponseDto, [string]>(
-    (userQuestion: string) => chatService.askAssistant(userQuestion)
-  );
+  const { data: chatData, execute: sendQuestion,
+    error: chatError, loading: answerLoading } = useApi<ChatResponseDto, [string]>(
+      (userQuestion: string) => chatService.askAssistant(userQuestion)
+    );
 
   useError(chatError);
 
@@ -157,8 +158,8 @@ export const ChatPage: React.FC = () => {
                   rows={2}
                   className="w-full bg-transparent border-none text-on-surface text-[15px] resize-none focus:outline-none placeholder:text-on-surface-variant/45 px-4 pt-4 pb-2 max-h-36 leading-relaxed"
                 />
-                <div className="flex justify-between items-center px-3 pb-3 pt-1">
-                  <div className="flex items-center gap-0.5 flex-wrap">
+                <div className="flex justify-end items-center px-3 pb-3 pt-1">
+                  {/* <div className="flex items-center gap-0.5 flex-wrap">
                     <button
                       type="button"
                       className="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-smooth"
@@ -181,7 +182,7 @@ export const ChatPage: React.FC = () => {
                         <Icon name="close" size={14} />
                       </button>
                     </div>
-                  </div>
+                  </div> */}
                   <button
                     type="button"
                     onClick={() => handleSend()}
@@ -200,7 +201,7 @@ export const ChatPage: React.FC = () => {
           </div>
         </div>
 
-        <RagSourcePanel />
+        <RagSourcePanel sources={chatData?.sources ?? []} />
       </div>
     </AppShell>
   );
