@@ -9,36 +9,43 @@ import { useApi } from '../hooks/useApi';
 import { chatService } from '../services/chatService';
 import type { ChatResponseDto } from '../api';
 import { useError } from '../hooks/useError';
-async function fetchAssistantReply(question: string): Promise<string | null> {
-  try {
-    const res = await fetch('http://localhost:3000/chat/ask-assistant', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userQuestion: question }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (typeof data === 'string') return data;
-    if (data?.response) return data.response;
-    if (data?.answer) return data.answer;
-    if (data?.message) return data.message;
-    return null;
-  } catch {
-    return null;
-  }
-}
+import { isAxiosError } from 'axios';
+
 
 export const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMsg[]>(SEED_CHAT_MESSAGES);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [aiId, setAiId] = useState('');
+  const [error, setError] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: chatData, execute: sendQuestion, error: chatError } = useApi<ChatResponseDto, [string]>(
+  const { data: chatData, execute: sendQuestion, error: chatError, loading: answerLoading } = useApi<ChatResponseDto, [string]>(
     (userQuestion: string) => chatService.askAssistant(userQuestion)
   );
 
   useError(chatError);
+
+  useEffect(() => {
+    if (chatError) {
+      if (!error) return;
+      const fallback = 'Unable to complete the request. Please try again.';
+
+      const message = isAxiosError(error)
+        ? ((error.response?.data as { message?: string } | undefined)?.message ?? fallback)
+        : fallback;
+
+      setError(message);
+    }
+  }, [chatError])
+
+  useEffect(() => {
+
+    if (answerLoading) {
+      setIsLoading(true)
+    }
+
+  }, [answerLoading])
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -51,7 +58,6 @@ export const ChatPage: React.FC = () => {
 
     sendQuestion(content);
 
-    return;
 
     const userMsg: ChatMsg = {
       id: Date.now().toString(),
@@ -60,7 +66,7 @@ export const ChatPage: React.FC = () => {
       timestamp: '',
     };
     const aiId = (Date.now() + 1).toString();
-
+    setAiId(aiId);
     setMessages((prev) => [
       ...prev,
       userMsg,
@@ -73,18 +79,8 @@ export const ChatPage: React.FC = () => {
       },
     ]);
     setInputValue('');
-    setIsLoading(true);
 
-    const reply =
-      (await fetchAssistantReply(content)) ??
-      `I've analyzed your question about "${content}" against the indexed knowledge base. The most relevant sources are cited in the panel on the right.`;
 
-    setMessages((prev) =>
-      prev.map((m) =>
-        m.id === aiId ? { ...m, content: reply, isStreaming: false } : m
-      )
-    );
-    setIsLoading(false);
   };
 
   const handleNewChat = () => {
@@ -97,6 +93,25 @@ export const ChatPage: React.FC = () => {
       },
     ]);
   };
+
+
+  useEffect(() => {
+    if (!chatData?.response) return;
+
+    const content = inputValue.trim();
+
+    const reply =
+      (chatData?.response) ??
+      error ?? `I've analyzed your question about "${content}" against the indexed knowledge base. The most relevant sources are cited in the panel on the right.`;
+
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === aiId ? { ...m, content: reply, isStreaming: false } : m
+      )
+    );
+    setIsLoading(false);
+
+  }, [chatData, error])
 
   return (
     <AppShell bare hideTopNav>

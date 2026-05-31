@@ -14,7 +14,7 @@ export class EmbeddingsService {
   constructor(
     private readonly appConfig: AppConfig
   ) {
-    this.genAI = new GoogleGenerativeAI(appConfig.getEnvConfig().GEMINI_API_KEY!);
+    this.genAI = new GoogleGenerativeAI(appConfig.getEnvConfig().GEMINI_RAG_API_KEY!);
     this.model = this.genAI.getGenerativeModel({ model: "gemini-embedding-001", });
 
   }
@@ -49,7 +49,7 @@ export class EmbeddingsService {
             text
           }]
         },
-        outputDimensionality: 1536  // ✅ Add this line!        
+        outputDimensionality: 768  // ✅ Add this line!        
       })),
     });
 

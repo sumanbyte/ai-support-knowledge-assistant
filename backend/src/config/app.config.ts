@@ -31,6 +31,7 @@ export class AppConfig {
 
     getEnvConfig() {
         const GEMINI_API_KEY = this.configService.get<string>("GEMINI_API_KEY");
+        const GEMINI_RAG_API_KEY = this.configService.get<string>("GEMINI_RAG_API_KEY");
         const UPSTASH_VECTOR_REST_URL = this.configService.get<string>("UPSTASH_VECTOR_REST_URL")
         const UPSTASH_VECTOR_REST_TOKEN = this.configService.get<string>("UPSTASH_VECTOR_REST_TOKEN");
         const GOOGLE_CLIENT_ID = this.configService.get<string>("GOOGLE_CLIENT_ID");
@@ -45,7 +46,8 @@ export class AppConfig {
             JWT_EXPIRES_IN: this.configService.get<string>("JWT_EXPIRES_IN"),
             GOOGLE_CLIENT_ID,
             GOOGLE_CLIENT_SECRET,
-            GOOGLE_CALLBACK_URL
+            GOOGLE_CALLBACK_URL,
+            GEMINI_RAG_API_KEY
         }
     }
 
