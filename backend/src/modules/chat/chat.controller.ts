@@ -41,11 +41,12 @@ export class ChatController {
 
   @ApiOkResponse({ type: ChatResponseDto })
   @ApiOperation({ summary: 'Ask the assistant a question', description: 'Ask the assistant a question and get a response' })
-  @Post("ask-assistant")
+  @Post(`ask-assistant{/:id}`)
   askAssistant(
     @Body("userQuestion") userQuestion: string,
-    @GetUser() user: Omit<User, 'password'>
+    @GetUser() user: Omit<User, 'password'>,
+    @Param('id') chatId: string
   ) {
-    return this.chatService.askAssistant(userQuestion, user.id)
+    return this.chatService.askAssistant(userQuestion, user.id, chatId)
   }
 }

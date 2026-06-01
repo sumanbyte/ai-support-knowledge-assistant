@@ -24,6 +24,9 @@ export class ChatSourceDto {
 }
 
 export class ChatResponseDto {
+    @ApiProperty({ type: String })
+    chatId: string;
+
     @ApiProperty({ type: Boolean })
     success: boolean;
 

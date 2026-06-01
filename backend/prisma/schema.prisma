@@ -45,6 +45,7 @@ model User {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   documents Document[]
+  chats     Chat[]
 }
 
 model Document {
@@ -78,4 +79,34 @@ model RagMetrics {
 
   @@index([createdAt])
   @@map("rag_metrics")
+}
+
+enum ChatMessageRole {
+  USER
+  ASSISTANT
+}
+
+model Chat {
+  id           String        @id @default(uuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  chatMessages ChatMessage[]
+
+  @@index([userId])
+  @@map("chats")
+}
+
+model ChatMessage {
+  id        String          @id @default(uuid())
+  chatId    String
+  chat      Chat            @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  content   String
+  role      ChatMessageRole
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([chatId])
+  @@map("chat_messages")
 }

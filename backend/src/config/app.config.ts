@@ -37,7 +37,7 @@ export class AppConfig {
         const GOOGLE_CLIENT_ID = this.configService.get<string>("GOOGLE_CLIENT_ID");
         const GOOGLE_CLIENT_SECRET = this.configService.get<string>("GOOGLE_CLIENT_SECRET");
         const GOOGLE_CALLBACK_URL = this.configService.get<string>("GOOGLE_CALLBACK_URL");
-
+        const FRONTEND_URL = this.configService.get<string>("FRONTEND_URL");
         return {
             GEMINI_API_KEY,
             UPSTASH_VECTOR_REST_TOKEN,
@@ -47,7 +47,8 @@ export class AppConfig {
             GOOGLE_CLIENT_ID,
             GOOGLE_CLIENT_SECRET,
             GOOGLE_CALLBACK_URL,
-            GEMINI_RAG_API_KEY
+            GEMINI_RAG_API_KEY,
+            FRONTEND_URL
         }
     }
 

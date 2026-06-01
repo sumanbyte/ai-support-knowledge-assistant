@@ -32,11 +32,15 @@ import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth-guard';
 import { GetUser } from './decorators/current-user.decorator';
 import type { Request, Response } from 'express';
+import { AppConfig } from '@/src/config/app.config';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly appConfig: AppConfig
+  ) { }
 
   @Post('signup')
   @ApiOperation({ summary: 'Register a new user' })
@@ -66,14 +70,29 @@ export class AuthController {
   @Get('google')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Start Google OAuth' })
-  googleAuth() {}
+  googleAuth() { }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
-    const result = await this.authService.validateGoogleUser(req.user);
-    return res.status(200).json(result);
+    const user = req.user;
+
+    if (!user) {
+      return res.redirect(`${process.env.FRONTEND_URL}/login?error=Failed to login with Google`);
+    }
+
+    try {
+      const { accessToken, refreshToken } =
+        await this.authService.validateGoogleUser(user);
+      res.cookie('refresh_token', refreshToken, this.appConfig.getCookieOptions('refresh'));
+      res.cookie('access_token', accessToken, this.appConfig.getCookieOptions('access'));
+      return res.redirect(`${this.appConfig.getEnvConfig().FRONTEND_URL}/dashboard`);
+    } catch {
+      return res.redirect(
+        `${this.appConfig.getEnvConfig().FRONTEND_URL}/login?error=google_failed`,
+      );
+    }
   }
 
   @UseGuards(JwtAuthGuard)

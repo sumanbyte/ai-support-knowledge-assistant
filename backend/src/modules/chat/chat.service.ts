@@ -4,13 +4,16 @@ import { UpdateChatDto } from './dto/update-chat.dto';
 import { EmbeddingsService } from '../embeddings/embeddings.service';
 import { VectorService } from '../vector/vector.service';
 import { RagService } from '../rag/rag.service';
+import { PrismaService } from '../auth/prisma/prisma.service';
+import { ChatMessageRole } from '@/generated/prisma/enums';
 
 @Injectable()
 export class ChatService {
 
   constructor(private readonly embeddingService: EmbeddingsService,
     private readonly vectorService: VectorService,
-    private readonly ragService: RagService
+    private readonly ragService: RagService,
+    private readonly prismaService: PrismaService
   ) { }
   create(createChatDto: CreateChatDto) {
     return 'This action adds a new chat';
@@ -32,7 +35,7 @@ export class ChatService {
     return `This action removes a #${id} chat`;
   }
 
-  async askAssistant(userQuestion: string, userId: string) {
+  async askAssistant(userQuestion: string, userId: string, chatId: string) {
     console.log("Asking assistant for user:", userId);
     const [queryEmbedding] = await this.embeddingService.generateEmbeddings([userQuestion]);
 
@@ -46,8 +49,44 @@ export class ChatService {
 
     const response = await this.ragService.generateResponse(contextText)
 
+    let newChatId;
+    if (!chatId) {
+      newChatId = await this.prismaService.chat.create({
+        data: {
+          userId,
+          chatMessages: {
+            create: {
+
+              content: userQuestion,
+              role: ChatMessageRole.USER
+            }
+          }
+
+        }
+      })
+    } else {
+      await this.prismaService.chatMessage.create({
+        data: {
+          content: userQuestion,
+          role: ChatMessageRole.USER,
+          chatId
+        }
+      })
+    }
+
+    await this.prismaService.chatMessage.create({
+      data: {
+        content: response,
+        role: ChatMessageRole.ASSISTANT,
+        chatId
+      }
+    })
+
+
+
     return {
       success: true,
+      chatId: newChatId?.id ?? chatId,
       response,
       sources: contextChunks.map((chunk, index) => ({
         citationNumber: index + 1,

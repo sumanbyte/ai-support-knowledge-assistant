@@ -10,6 +10,7 @@ import { chatService } from '../services/chatService';
 import type { ChatResponseDto } from '../api';
 import { useError } from '../hooks/useError';
 import { isAxiosError } from 'axios';
+import { useNavigate, useParams } from 'react-router-dom';
 
 
 export const ChatPage: React.FC = () => {
@@ -19,30 +20,39 @@ export const ChatPage: React.FC = () => {
   const [aiId, setAiId] = useState('');
   const [error, setError] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const { chatId } = useParams();
 
   const { data: chatData, execute: sendQuestion,
     error: chatError, loading: answerLoading } = useApi<ChatResponseDto, [string]>(
-      (userQuestion: string) => chatService.askAssistant(userQuestion)
+      (userQuestion: string) => chatService.askAssistant(userQuestion, chatId)
     );
 
-  useError(chatError);
+
 
   useEffect(() => {
+
+    console.log("chatError", chatError)
     if (chatError) {
-      if (!error) return;
+
       const fallback = 'Unable to complete the request. Please try again.';
 
       const message = isAxiosError(error)
         ? ((error.response?.data as { message?: string } | undefined)?.message ?? fallback)
         : fallback;
 
+      console.log("chatError", chatError)
+      setIsLoading(false)
       setError(message);
     }
   }, [chatError])
 
+  useError(chatError);
+
   useEffect(() => {
 
     if (answerLoading) {
+      // console.log("answerLoading", answerLoading)
       setIsLoading(true)
     }
 
@@ -95,9 +105,12 @@ export const ChatPage: React.FC = () => {
     ]);
   };
 
+  console.log("answerLoading", answerLoading)
 
   useEffect(() => {
     if (!chatData?.response) return;
+
+    setIsLoading(false);
 
     const content = inputValue.trim();
 
@@ -105,12 +118,14 @@ export const ChatPage: React.FC = () => {
       (chatData?.response) ??
       error ?? `I've analyzed your question about "${content}" against the indexed knowledge base. The most relevant sources are cited in the panel on the right.`;
 
+
+    navigate(`/chat/${chatData?.chatId ?? ''}`);
+
     setMessages((prev) =>
       prev.map((m) =>
         m.id === aiId ? { ...m, content: reply, isStreaming: false } : m
       )
     );
-    setIsLoading(false);
 
   }, [chatData, error])
 

@@ -101,7 +101,7 @@ export interface paths {
         patch: operations["ChatController_update"];
         trace?: never;
     };
-    "/chat/ask-assistant": {
+    "/chat/ask-assistant/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -481,6 +481,7 @@ export interface components {
             snippet: string;
         };
         ChatResponseDto: {
+            chatId: string;
             success: boolean;
             response: string;
             sources: components["schemas"]["ChatSourceDto"][];
@@ -773,7 +774,9 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;

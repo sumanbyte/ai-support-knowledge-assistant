@@ -257,11 +257,20 @@
         ]
       }
     },
-    "/chat/ask-assistant": {
+    "/chat/ask-assistant/{id}": {
       "post": {
         "description": "Ask the assistant a question and get a response",
         "operationId": "ChatController_askAssistant",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -1123,6 +1132,9 @@
       "ChatResponseDto": {
         "type": "object",
         "properties": {
+          "chatId": {
+            "type": "string"
+          },
           "success": {
             "type": "boolean"
           },
@@ -1137,6 +1149,7 @@
           }
         },
         "required": [
+          "chatId",
           "success",
           "response",
           "sources"

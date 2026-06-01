@@ -120,15 +120,10 @@ export const LoginPage: React.FC = () => {
         <AuthDivider label="or continue with" />
 
         <div className="grid grid-cols-1 gap-4">
+
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-3 rounded-lg border border-outline-variant/40 bg-transparent py-3 text-body-md text-on-surface transition-all hover:bg-white/5 active:scale-[0.98]"
-          >
-            <Icon name="id_card" size={20} />
-            Continue with SSO
-          </button>
-          <button
-            type="button"
+            onClick={() => authService.startGoogleLogin()}
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-outline-variant/40 bg-transparent py-3 text-body-md text-on-surface transition-all hover:bg-white/5 active:scale-[0.98]"
           >
             <GoogleIcon />

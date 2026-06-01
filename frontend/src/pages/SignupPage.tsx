@@ -10,6 +10,7 @@ import { authService } from '../services/authService';
 import { useApi } from '../hooks/useApi';
 import { isAxiosError } from 'axios';
 import { useAppNavigate } from '../hooks/useAppNavigate';
+import { GoogleIcon } from '../components/auth/GoogleIcon';
 
 export const SignupPage: React.FC = () => {
   const navigate = useAppNavigate();
@@ -152,10 +153,11 @@ export const SignupPage: React.FC = () => {
 
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-outline-variant/30 bg-surface-container py-3 text-body-md text-on-surface transition-all hover:bg-surface-container-high active:scale-[0.98]"
+            onClick={() => authService.startGoogleLogin()}
+            className="flex w-full items-center justify-center gap-3 rounded-lg border border-outline-variant/40 bg-transparent py-3 text-body-md text-on-surface transition-all hover:bg-white/5 active:scale-[0.98]"
           >
-            <SsoIcon />
-            Continue with SSO
+            <GoogleIcon />
+            Continue with Google
           </button>
         </form>
 

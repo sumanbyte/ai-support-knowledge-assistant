@@ -38,7 +38,7 @@ export const router = createBrowserRouter([
         loader: protectedRouteLoader, // blocks rendering until /auth/me finishes
         children: [
           { path: 'dashboard', element: <EnterpriseHub /> },
-          { path: 'chat', element: <ChatPage /> },
+          { path: 'chat/:chatId?', element: <ChatPage /> },
           { path: 'documents', element: <DocumentLibrary /> },
           { path: 'knowledge-base', element: <KnowledgeBase /> },
           { path: 'ingestion', element: <IngestionPipeline /> },

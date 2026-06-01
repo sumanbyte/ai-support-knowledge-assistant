@@ -18,4 +18,10 @@ export const authService = {
 
   logout: (): Promise<{ ok: boolean }> =>
     axiosInstance.post('/auth/logout') as Promise<{ ok: boolean }>,
+
+  /** Server-side Passport redirect flow (see GET /auth/google on the API). */
+  startGoogleLogin: (): void => {
+    const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
+    window.location.href = `${baseURL}/auth/google`;
+  },
 };

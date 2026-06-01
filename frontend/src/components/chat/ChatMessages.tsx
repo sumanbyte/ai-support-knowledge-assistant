@@ -5,13 +5,13 @@ export type ChatMsg =
   | { id: string; type: 'separator'; label: string }
   | { id: string; type: 'user'; content: string; timestamp: string }
   | {
-      id: string;
-      type: 'ai';
-      content: string;
-      timestamp: string;
-      citations?: number[];
-      isStreaming?: boolean;
-    };
+    id: string;
+    type: 'ai';
+    content: string;
+    timestamp: string;
+    citations?: number[];
+    isStreaming?: boolean;
+  };
 
 interface ChatMessagesProps {
   messages: ChatMsg[];
@@ -89,9 +89,8 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
         return (
           <div key={msg.id} className="flex items-start gap-3 max-w-[min(100%,46rem)]">
             <div
-              className={`w-9 h-9 rounded-lg bg-primary/10 border flex items-center justify-center shrink-0 mt-0.5 ${
-                msg.isStreaming ? 'border-primary/50 ai-glow-sm' : 'border-primary/25'
-              }`}
+              className={`w-9 h-9 rounded-lg bg-primary/10 border flex items-center justify-center shrink-0 mt-0.5 ${msg.isStreaming ? 'border-primary/50 ai-glow-sm' : 'border-primary/25'
+                }`}
             >
               <Icon name="auto_awesome" size={18} className="text-primary" />
             </div>
