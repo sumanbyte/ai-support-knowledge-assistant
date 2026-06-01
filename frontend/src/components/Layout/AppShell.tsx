@@ -30,7 +30,7 @@ export const AppShell: React.FC<AppShellProps> = ({
     id: item.id,
     label: item.label,
     icon: item.icon,
-    active: item.id === currentPage,
+    active: location.pathname.startsWith("/" + item.id),
   }));
 
   const go = (page: PageType) => navigate(page);
@@ -54,9 +54,8 @@ export const AppShell: React.FC<AppShellProps> = ({
       )}
 
       <div
-        className={`relative z-10 md:ml-[var(--layout-sidebar-width)] min-h-screen flex flex-col ${
-          hideTopNav ? 'h-screen pt-0' : 'pt-[var(--layout-topbar-height)]'
-        } ${bare ? 'overflow-hidden' : ''}`}
+        className={`relative z-10 md:ml-[var(--layout-sidebar-width)] min-h-screen flex flex-col ${hideTopNav ? 'h-screen pt-0' : 'pt-[var(--layout-topbar-height)]'
+          } ${bare ? 'overflow-hidden' : ''}`}
       >
         {!bare && header}
         <main className={bare ? 'flex-1 flex flex-col min-h-0 overflow-hidden' : 'flex-1 pb-4'}>
@@ -77,9 +76,8 @@ export const AppShell: React.FC<AppShellProps> = ({
             key={item.id}
             type="button"
             onClick={() => go(item.id)}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg ${
-              currentPage === item.id ? 'text-primary' : 'text-on-surface-variant'
-            }`}
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg ${currentPage === item.id ? 'text-primary' : 'text-on-surface-variant'
+              }`}
           >
             <Icon name={item.icon} size={22} filled={currentPage === item.id} />
             <span className="font-label-sm text-[11px]">{item.label}</span>

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
@@ -7,11 +7,24 @@ import { User } from '@/generated/prisma/client';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { ChatResponseDto } from './dto/chat-response-dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
+import { PaginationQueryDto } from '@/src/common/dto-spec/pagination-query.dto';
+import { PaginatedChatDto } from './dto/paginated-chat.dto';
+import { PaginatedChatMessageDto } from './dto/paginated-chat-message.dto';
 
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
 export class ChatController {
   constructor(private readonly chatService: ChatService) { }
+
+  @Get("history")
+  @ApiOkResponse({ type: PaginatedChatDto })
+  getChatHistory(
+    @GetUser() user: Omit<User, 'password'>,
+    @Query() paginationQuery: PaginationQueryDto
+  ) {
+    console.log("Getting chat history for user:");
+    return this.chatService.getChatHistory(user.id, paginationQuery)
+  }
 
   @Post()
   create(@Body() createChatDto: CreateChatDto) {
@@ -48,5 +61,16 @@ export class ChatController {
     @Param('id') chatId: string
   ) {
     return this.chatService.askAssistant(userQuestion, user.id, chatId)
+  }
+
+
+
+  @Get("messages/:id")
+  @ApiOkResponse({ type: PaginatedChatMessageDto })
+  getChatMessages(
+    @Param('id') chatId: string,
+    @Query() paginationQuery: PaginationQueryDto
+  ) {
+    return this.chatService.getChatMessages(chatId, paginationQuery)
   }
 }

@@ -69,6 +69,22 @@ export interface paths {
         patch: operations["UploadController_update"];
         trace?: never;
     };
+    "/chat/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ChatController_getChatHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/chat": {
         parameters: {
             query?: never;
@@ -115,6 +131,22 @@ export interface paths {
          * @description Ask the assistant a question and get a response
          */
         post: operations["ChatController_askAssistant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/messages/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ChatController_getChatMessages"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -469,6 +501,54 @@ export interface components {
             /** @description Data */
             data: components["schemas"]["DocumentDto"];
         };
+        ChatMessageDto: {
+            /** @description The ID of the chat message */
+            id: string;
+            /** @description The content of the chat message */
+            content: string;
+            /**
+             * @description The role of the chat message
+             * @enum {string}
+             */
+            role: "USER" | "ASSISTANT";
+            /**
+             * Format: date-time
+             * @description The creation date of the chat message
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description The last update date of the chat message
+             */
+            updatedAt: string;
+        };
+        ChatDto: {
+            /** @description The ID of the chat */
+            id: string;
+            /** @description The name of the chat */
+            name: string;
+            /** @description Messages in the chat */
+            chatMessages: components["schemas"]["ChatMessageDto"][];
+            /** @description The number of messages in the chat */
+            messageCount: number;
+            /**
+             * Format: date-time
+             * @description The creation date of the chat
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description The last update date of the chat
+             */
+            updatedAt: string;
+        };
+        PaginatedChatDto: {
+            data: components["schemas"]["ChatDto"][];
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+        };
         CreateChatDto: Record<string, never>;
         UpdateChatDto: Record<string, never>;
         ChatSourceDto: {
@@ -485,6 +565,13 @@ export interface components {
             success: boolean;
             response: string;
             sources: components["schemas"]["ChatSourceDto"][];
+        };
+        PaginatedChatMessageDto: {
+            data: components["schemas"]["ChatMessageDto"][];
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
         };
         CreateUserDto: Record<string, never>;
         UpdateUserDto: Record<string, never>;
@@ -671,6 +758,25 @@ export interface operations {
             };
         };
     };
+    ChatController_getChatHistory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedChatDto"];
+                };
+            };
+        };
+    };
     ChatController_findAll: {
         parameters: {
             query?: never;
@@ -787,6 +893,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChatResponseDto"];
+                };
+            };
+        };
+    };
+    ChatController_getChatMessages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedChatMessageDto"];
                 };
             };
         };

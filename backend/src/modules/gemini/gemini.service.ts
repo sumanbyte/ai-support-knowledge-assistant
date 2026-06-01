@@ -11,7 +11,7 @@ export class GeminiService {
         private readonly appConfig: AppConfig
     ) {
         this.genAI = new GoogleGenerativeAI(appConfig.getEnvConfig().GEMINI_API_KEY!);
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash", });
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite", });
 
     }
 

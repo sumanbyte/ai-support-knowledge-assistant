@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 import { EmbeddingsService } from '../embeddings/embeddings.service';
@@ -6,6 +6,7 @@ import { VectorService } from '../vector/vector.service';
 import { RagService } from '../rag/rag.service';
 import { PrismaService } from '../auth/prisma/prisma.service';
 import { ChatMessageRole } from '@/generated/prisma/enums';
+import { PaginationQueryDto } from '@/src/common/dto-spec/pagination-query.dto';
 
 @Injectable()
 export class ChatService {
@@ -99,5 +100,81 @@ export class ChatService {
         numberOfPages: chunk.numberOfPages,
       }))
     };
+  }
+
+
+
+  async getChatHistory(userId: string, paginationQuery: PaginationQueryDto) {
+    const [chats, total] = await Promise.all([
+      this.prismaService.chat.findMany({
+        where: { userId },
+        skip: paginationQuery.skip,
+        take: paginationQuery.limit,
+        orderBy: { updatedAt: 'desc' },
+        include: {
+          // Preview only (for list subtitle)
+          chatMessages: {
+            take: 1,
+            where: { role: ChatMessageRole.USER },
+          },
+          // Full count — NOT limited by take above
+          _count: {
+            select: { chatMessages: true },
+          },
+        },
+      }),
+      this.prismaService.chat.count({ where: { userId } }),
+    ]);
+
+    return {
+      data: chats.map((chat) => ({
+        id: chat.id,
+        name: chat.name,
+        createdAt: chat.createdAt,
+        updatedAt: chat.updatedAt,
+        chatMessages: chat.chatMessages,
+        messageCount: chat._count.chatMessages,
+      })),
+      total,
+      page: paginationQuery.page,
+      limit: paginationQuery.limit,
+      totalPages: Math.ceil(total / (paginationQuery.limit ?? 10)),
+    };
+
+  }
+
+  async getChatMessages(
+    chatid: string,
+    paginationQuery: PaginationQueryDto
+  ) {
+    const [messages, total] = await Promise.all([
+      this.prismaService.chatMessage.findMany({
+        where: {
+          chatId: chatid
+        },
+        skip: paginationQuery.skip,
+        take: paginationQuery.limit,
+        orderBy: { createdAt: 'asc' },
+      }),
+      this.prismaService.chatMessage.count({
+        where: {
+          chatId: chatid
+        }
+      })
+    ]);
+
+
+
+    if (!messages) {
+      throw new NotFoundException('Messages not found for chat');
+    }
+
+    return {
+      data: messages,
+      total,
+      page: paginationQuery.page,
+      limit: paginationQuery.limit,
+      totalPages: Math.ceil(total / (paginationQuery.limit ?? 10))
+    }
   }
 }

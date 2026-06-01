@@ -65,8 +65,6 @@ function renderAiContent(content: string) {
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
 
-  console.log("messages", messages)
-
   return (
     <div className="flex flex-col gap-8 py-8">
       {messages.map((msg) => {

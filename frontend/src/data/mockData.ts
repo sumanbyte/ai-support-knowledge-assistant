@@ -21,6 +21,59 @@ export const RECENT_CHATS = [
   },
 ];
 
+export type ChatHistorySession = {
+  id: string;
+  title: string;
+  preview: string;
+  date: string;
+  messageCount: number;
+};
+
+export const CHAT_HISTORY_SESSIONS: ChatHistorySession[] = [
+  {
+    id: 'q4-earnings',
+    title: 'Q4 Earnings Analysis',
+    preview: 'Summarize supply chain risk factors from the Acme Q4 10-K filing.',
+    date: 'Today',
+    messageCount: 12,
+  },
+  {
+    id: '1',
+    title: 'Q3 Revenue Analysis',
+    preview: 'Can you summarize the main factors contributing to the dip in EMEA region?',
+    date: 'Yesterday',
+    messageCount: 8,
+  },
+  {
+    id: 'project-alpha',
+    title: 'Project Alpha Overview',
+    preview: 'What are the key milestones and blockers mentioned in the steering doc?',
+    date: 'Mar 28, 2026',
+    messageCount: 15,
+  },
+  {
+    id: '2',
+    title: 'Onboarding Draft Review',
+    preview: 'Review this draft and ensure tone aligns with our style guide.',
+    date: 'Mar 27, 2026',
+    messageCount: 6,
+  },
+  {
+    id: 'compliance-faq',
+    title: 'Compliance FAQ Draft',
+    preview: 'List GDPR-related obligations referenced in our internal policy pack.',
+    date: 'Mar 25, 2026',
+    messageCount: 10,
+  },
+  {
+    id: '3',
+    title: 'API Error Debugging',
+    preview: "I'm getting a 500 error on the /v1/completions endpoint. Here are the logs...",
+    date: 'Mar 22, 2026',
+    messageCount: 4,
+  },
+];
+
 export const PIPELINE_STEPS = [
   { id: 'ingest', label: 'Ingestion (S3 Bucket)', progress: 100, status: 'complete' as const, icon: 'cloud_download' },
   { id: 'embed', label: 'Embedding Generation', progress: 68, status: 'active' as const, icon: 'model_training' },

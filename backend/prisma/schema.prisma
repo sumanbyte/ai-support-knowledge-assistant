@@ -88,6 +88,7 @@ enum ChatMessageRole {
 
 model Chat {
   id           String        @id @default(uuid())
+  name         String        @default("Untitled Chat")
   userId       String
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt    DateTime      @default(now())

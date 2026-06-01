@@ -146,6 +146,27 @@
         ]
       }
     },
+    "/chat/history": {
+      "get": {
+        "operationId": "ChatController_getChatHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedChatDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Chat"
+        ]
+      }
+    },
     "/chat": {
       "post": {
         "operationId": "ChatController_create",
@@ -284,6 +305,36 @@
           }
         },
         "summary": "Ask the assistant a question",
+        "tags": [
+          "Chat"
+        ]
+      }
+    },
+    "/chat/messages/{id}": {
+      "get": {
+        "operationId": "ChatController_getChatMessages",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedChatMessageDto"
+                }
+              }
+            }
+          }
+        },
         "tags": [
           "Chat"
         ]
@@ -1086,6 +1137,116 @@
           "data"
         ]
       },
+      "ChatMessageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the chat message"
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the chat message"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "ASSISTANT"
+            ],
+            "description": "The role of the chat message"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The creation date of the chat message"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The last update date of the chat message"
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "role",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ChatDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the chat"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the chat"
+          },
+          "chatMessages": {
+            "description": "Messages in the chat",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessageDto"
+            }
+          },
+          "messageCount": {
+            "type": "number",
+            "description": "The number of messages in the chat"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The creation date of the chat"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "The last update date of the chat"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "chatMessages",
+          "messageCount",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginatedChatDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "totalPages": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "total",
+          "page",
+          "limit",
+          "totalPages"
+        ]
+      },
       "CreateChatDto": {
         "type": "object",
         "properties": {}
@@ -1153,6 +1314,36 @@
           "success",
           "response",
           "sources"
+        ]
+      },
+      "PaginatedChatMessageDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessageDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "totalPages": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "total",
+          "page",
+          "limit",
+          "totalPages"
         ]
       },
       "CreateUserDto": {

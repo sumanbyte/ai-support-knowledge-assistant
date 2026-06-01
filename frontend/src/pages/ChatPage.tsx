@@ -7,7 +7,7 @@ import { Icon } from '../components/UI/Icon';
 import { CHAT_SUGGESTIONS, SEED_CHAT_MESSAGES } from '../data/mockData';
 import { useApi } from '../hooks/useApi';
 import { chatService } from '../services/chatService';
-import type { ChatResponseDto } from '../api';
+import { type ChatResponseDto, type PaginatedChatMessageDto } from '../api';
 import { useError } from '../hooks/useError';
 import { isAxiosError } from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -33,6 +33,31 @@ export const ChatPage: React.FC = () => {
     );
 
 
+  const { data: chatMessages, execute: getChatMessages, error: chatMessagesError, loading: chatMessagesLoading } = useApi<PaginatedChatMessageDto, [string, number, number]>(
+    (chatId: string, page: number, limit: number) => chatService.getChatMessages(chatId, page, limit));
+
+  useError(chatMessagesError);
+
+  console.log("chatMessages", chatMessages);
+
+  //fetch chat messages using chatid
+  useEffect(() => {
+    if (!chatId) return;
+    getChatMessages(chatId, 1, 10);
+  }, [chatId]);
+
+  //set messages to chat messages
+  useEffect(() => {
+    if (!chatMessages?.data) return;
+    const newMessages: ChatMsg[] = chatMessages.data.map((message) => ({
+      id: message.id,
+      type: message.role === 'USER' ? 'user' : 'ai',
+      content: message.content,
+      timestamp: new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    }));
+    setMessages(newMessages);
+  }, [chatMessages?.data]);
+
 
   useEffect(() => {
 
@@ -45,6 +70,7 @@ export const ChatPage: React.FC = () => {
       : fallback;
 
     setMessages((prev) => prev.map((m) => m.id === aiId ? { ...m, content: message, isLoading: false } : m));
+    setIsLoading(false)
 
   }, [chatError, aiId])
 
@@ -125,6 +151,8 @@ export const ChatPage: React.FC = () => {
         m.id === aiId ? { ...m, content: reply, isLoading: false } : m
       )
     );
+
+    setIsLoading(false)
 
   }, [chatData])
 
@@ -215,7 +243,7 @@ export const ChatPage: React.FC = () => {
           </div>
         </div>
 
-        <RagSourcePanel sources={chatData?.sources ?? []} />
+        <RagSourcePanel sources={chatData?.sources ?? []} activeChatId={chatId} />
       </div>
     </AppShell>
   );

@@ -24,3 +24,17 @@ export type DeleteResponseDto = components['schemas']['DeleteResponseDto'];
 export type DocumentAnalyticsResponseDto =
   components['schemas']['DocumentAnalyticsResponseDto'];
 export type ChatResponseDto = components['schemas']['ChatResponseDto'];
+
+export type ChatDto = components['schemas']['ChatDto'];
+export type ChatMessageDto = components['schemas']['ChatMessageDto'];
+export type PaginatedChatDto = components['schemas']['PaginatedChatDto'];
+export type PaginatedChatMessageDto = components['schemas']['PaginatedChatMessageDto'];
+
+/** Shape shared by all paginated API responses */
+export type PaginatedResponseDto<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
