@@ -4,7 +4,8 @@ import { ChatMessages, type ChatMsg } from '../components/chat/ChatMessages';
 import { RagSourcePanel } from '../components/chat/RagSourcePanel';
 import { AppShell } from '../components/Layout';
 import { Icon } from '../components/UI/Icon';
-import { CHAT_SUGGESTIONS, SEED_CHAT_MESSAGES } from '../data/mockData';
+import { ChatMessagesLoader } from '../components/UI/Loading';
+import { CHAT_SUGGESTIONS } from '../data/mockData';
 import { useApi } from '../hooks/useApi';
 import { chatService } from '../services/chatService';
 import { type ChatResponseDto, type PaginatedChatMessageDto } from '../api';
@@ -38,7 +39,7 @@ export const ChatPage: React.FC = () => {
 
   useError(chatMessagesError);
 
-  console.log("chatMessages", chatMessages);
+  const isLoadingThread = Boolean(chatId) && chatMessagesLoading;
 
   //fetch chat messages using chatid
   useEffect(() => {
@@ -132,8 +133,6 @@ export const ChatPage: React.FC = () => {
     ]);
   };
 
-  console.log("answerLoading", answerLoading)
-
   useEffect(() => {
     if (!chatData?.response) return;
 
@@ -165,7 +164,11 @@ export const ChatPage: React.FC = () => {
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto terminal-scroll">
             <div className="max-w-3xl mx-auto w-full px-6 lg:px-8">
-              <ChatMessages messages={messages} />
+              {isLoadingThread ? (
+                <ChatMessagesLoader />
+              ) : (
+                <ChatMessages messages={messages} />
+              )}
             </div>
           </div>
 

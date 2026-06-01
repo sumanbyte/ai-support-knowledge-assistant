@@ -3,6 +3,7 @@ import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
+import { KnowledgeBaseLoader } from '../components/UI/Loading';
 import { useAppNavigate } from '../hooks/useAppNavigate';
 import { useApi } from '../hooks/useApi';
 import type { DocumentAnalyticsResponseDto, DocumentResponseDto } from '../api';
@@ -33,10 +34,14 @@ export const KnowledgeBase: React.FC = () => {
   const [averageQueryLatency, setAverageQueryLatency] = useState(0);
   const [documents, setDocuments] = useState<KnowledgeEntry[]>([]);
 
-  const { data: analyticsData, execute: executeAnalytics } =
+  const { data: analyticsData, execute: executeAnalytics, loading: analyticsLoading } =
     useApi<DocumentAnalyticsResponseDto, []>(analyticsService.getDocumentsAnalytics);
 
-  const { data: documentData, execute: fetchDocuments } = useApi<DocumentResponseDto, []>(documentService.getAllDocuments);
+  const { data: documentData, execute: fetchDocuments, loading: documentsLoading } =
+    useApi<DocumentResponseDto, []>(documentService.getAllDocuments);
+
+  const isLoading =
+    (documentsLoading && !documentData) || (analyticsLoading && !analyticsData);
 
   useEffect(() => {
     if (documentData) {
@@ -105,6 +110,10 @@ export const KnowledgeBase: React.FC = () => {
       }
     >
       <PageContent className="space-y-8">
+        {isLoading ? (
+          <KnowledgeBaseLoader />
+        ) : (
+          <>
         <div className="relative max-w-xl">
           <Icon name="search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" />
           <input
@@ -224,6 +233,8 @@ export const KnowledgeBase: React.FC = () => {
             ))}
           </div>
         </div>
+          </>
+        )}
       </PageContent>
     </AppShell>
   );

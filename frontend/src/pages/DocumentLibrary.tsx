@@ -3,6 +3,7 @@ import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
+import { DocumentGridSkeleton } from '../components/UI/Loading';
 import { useApi } from '../hooks/useApi';
 import { documentService } from '../services/documentService';
 import type { DeleteResponseDto, DocumentDto, DocumentIcon, DocumentResponseDto, DocumentStatus, UploadResponseDto } from '../api';
@@ -52,9 +53,11 @@ export const DocumentLibrary: React.FC = () => {
 
   const hasProcessingDocs = useMemo(() => documents.some(doc => doc.status === "PROCESSING"), [documents]);
 
-  const { data, execute } = useApi<DocumentResponseDto, []>(
+  const { data, execute, loading: documentsLoading } = useApi<DocumentResponseDto, []>(
     documentService.getAllDocuments,
   );
+
+  const isInitialLoad = documentsLoading && !data;
 
   const { data: deleteData, execute: deleteExecute, loading: deleteLoading, error: deleteError } = useApi<DeleteResponseDto, [string, string]>(
     (id: string, publicId: string) => uploadService.deleteFile(id, publicId),
@@ -328,6 +331,9 @@ export const DocumentLibrary: React.FC = () => {
         </div>
 
         {/* Card grid */}
+        {isInitialLoad ? (
+          <DocumentGridSkeleton count={6} />
+        ) : (
         <div
           className={
             viewMode === 'grid'
@@ -335,6 +341,15 @@ export const DocumentLibrary: React.FC = () => {
               : 'flex flex-col gap-3'
           }
         >
+          {filtered.length === 0 ? (
+            <div className="col-span-full glass-panel rounded-xl py-16 flex flex-col items-center gap-3 text-center">
+              <Icon name="folder_open" size={40} className="text-on-surface-variant/50" />
+              <p className="text-on-surface font-medium">No documents found</p>
+              <p className="text-sm text-on-surface-variant/70">
+                {search ? 'Try a different search term.' : 'Upload a file to get started.'}
+              </p>
+            </div>
+          ) : null}
           {filtered.map((doc) => {
             return (
               <div
@@ -397,6 +412,7 @@ export const DocumentLibrary: React.FC = () => {
             );
           })}
         </div>
+        )}
 
         {/* Upload drop zone */}
         <button

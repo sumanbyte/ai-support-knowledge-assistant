@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Icon } from '../UI/Icon';
 import type { ChatResponseDto, PaginatedChatDto } from '../../api';
 import { Link } from 'react-router-dom';
-import { CHAT_HISTORY_SESSIONS } from '../../data/mockData';
 import { chatService } from '../../services/chatService';
 import { useApi } from '../../hooks/useApi';
 import { useError } from '../../hooks/useError';
 import { formatRelativeTime } from '../../utils/format-time';
+import { ChatHistoryLoader } from '../UI/Loading';
 type SidePanelTab = 'sources' | 'history';
 
 function SourceContextContent({ sources }: { sources: ChatResponseDto['sources'] }) {
@@ -86,12 +86,27 @@ function ChatHistoryContent({ activeChatId }: { activeChatId?: string }) {
     }
   }, [chatHistory]);
 
+  if (loading) {
+    return <ChatHistoryLoader />;
+  }
+
   return (
     <div className="flex-1 overflow-y-auto px-5 py-6 terminal-scroll">
       <p className="font-label-sm text-on-surface-variant/70 uppercase tracking-widest px-1 mb-4">
         Recent Sessions ({chats.length})
       </p>
       <div className="flex flex-col gap-2.5">
+        {chats.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center select-none">
+            <div className="mb-3 flex items-center justify-center w-14 h-14 rounded-full bg-primary/10">
+              <Icon name="forum" size={32} className="text-primary" />
+            </div>
+            <p className="text-sm font-medium text-on-surface mb-1">No chats yet</p>
+            <p className="text-xs text-on-surface-variant/70 max-w-[220px]">
+              Start a conversation and it will appear here.
+            </p>
+          </div>
+        ) : null}
         {chats.map((chat) => {
           const isActive = activeChatId === chat.id;
           return (
@@ -129,7 +144,7 @@ function ChatHistoryContent({ activeChatId }: { activeChatId?: string }) {
                     </span>
                   </div>
                   <p className="text-sm text-on-surface-variant/80 line-clamp-2 leading-relaxed mb-2">
-                    {chat.chatMessages[0].content}
+                    {chat.chatMessages[0]?.content ?? 'No preview yet'}
                   </p>
                   <span className="font-label-sm text-on-surface-variant/55 inline-flex items-center gap-1">
                     <Icon name="chat_bubble_outline" size={13} />
