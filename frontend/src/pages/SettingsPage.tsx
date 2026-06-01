@@ -44,7 +44,7 @@ export const SettingsPage: React.FC = () => {
           </span>
         </section>
 
-        <section className="glass-panel p-6 rounded-xl space-y-5">
+        {/* <section className="glass-panel p-6 rounded-xl space-y-5">
           <h3 className="text-headline-md text-on-surface font-medium flex items-center gap-2">
             <Icon name="psychology" className="text-primary" />
             AI & RAG
@@ -86,7 +86,7 @@ export const SettingsPage: React.FC = () => {
               className="w-full glass-overlay rounded-lg px-4 py-2.5 text-on-surface font-mono text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
             />
           </label>
-        </section>
+        </section> */}
 
         <section className="glass-panel p-7 rounded-xl">
           <h3 className="text-headline-md text-on-surface font-medium mb-4 flex items-center gap-2">
@@ -95,9 +95,9 @@ export const SettingsPage: React.FC = () => {
           </h3>
           <div className="space-y-3">
             {[
-              { name: 'Pinecone', status: 'Connected', icon: 'hub' },
+              { name: 'Upstash', status: 'Connected', icon: 'hub' },
               { name: 'Google Gemini', status: 'Connected', icon: 'auto_awesome' },
-              { name: 'S3 Ingestion', status: 'Active', icon: 'cloud' },
+              { name: 'Cloudinary', status: 'Active', icon: 'cloud' },
             ].map((i) => (
               <div
                 key={i.name}

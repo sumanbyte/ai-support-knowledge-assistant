@@ -5,7 +5,6 @@ export const MAIN_NAV: NavItem[] = [
   { id: 'chat', label: 'AI Chat', icon: 'chat_bubble', badge: 3 },
   { id: 'knowledge-base', label: 'Knowledge Base', icon: 'database', badge: 48 },
   { id: 'documents', label: 'Documents', icon: 'description', badge: 12 },
-  { id: 'analytics', label: 'Analytics', icon: 'monitoring' },
   { id: 'settings', label: 'Settings', icon: 'settings' },
 ];
 
