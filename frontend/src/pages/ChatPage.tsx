@@ -14,11 +14,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 
 export const ChatPage: React.FC = () => {
-  const [messages, setMessages] = useState<ChatMsg[]>(SEED_CHAT_MESSAGES);
+  const [messages, setMessages] = useState<ChatMsg[]>([{
+    id: 'welcome',
+    type: 'ai',
+    content: 'Welcome to Converse AI. Ask anything about your enterprise documents.',
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  }]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [aiId, setAiId] = useState('');
-  const [error, setError] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { chatId } = useParams();
@@ -32,20 +36,17 @@ export const ChatPage: React.FC = () => {
 
   useEffect(() => {
 
-    console.log("chatError", chatError)
-    if (chatError) {
+    if (!chatError || !aiId) return;
 
-      const fallback = 'Unable to complete the request. Please try again.';
+    const fallback = 'Unable to complete the request. Please try again.';
 
-      const message = isAxiosError(error)
-        ? ((error.response?.data as { message?: string } | undefined)?.message ?? fallback)
-        : fallback;
+    const message = isAxiosError(chatError)
+      ? ((chatError.response?.data as { message?: string } | undefined)?.message ?? fallback)
+      : fallback;
 
-      console.log("chatError", chatError)
-      setIsLoading(false)
-      setError(message);
-    }
-  }, [chatError])
+    setMessages((prev) => prev.map((m) => m.id === aiId ? { ...m, content: message, isLoading: false } : m));
+
+  }, [chatError, aiId])
 
   useError(chatError);
 
@@ -86,7 +87,7 @@ export const ChatPage: React.FC = () => {
         type: 'ai',
         content: '',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isStreaming: true,
+        isLoading: true,
       },
     ]);
     setInputValue('');
@@ -110,24 +111,22 @@ export const ChatPage: React.FC = () => {
   useEffect(() => {
     if (!chatData?.response) return;
 
-    setIsLoading(false);
 
     const content = inputValue.trim();
 
     const reply =
-      (chatData?.response) ??
-      error ?? `I've analyzed your question about "${content}" against the indexed knowledge base. The most relevant sources are cited in the panel on the right.`;
+      (chatData?.response) ?? `I've analyzed your question about "${content}" against the indexed knowledge base. The most relevant sources are cited in the panel on the right.`;
 
 
     navigate(`/chat/${chatData?.chatId ?? ''}`);
 
     setMessages((prev) =>
       prev.map((m) =>
-        m.id === aiId ? { ...m, content: reply, isStreaming: false } : m
+        m.id === aiId ? { ...m, content: reply, isLoading: false } : m
       )
     );
 
-  }, [chatData, error])
+  }, [chatData])
 
   return (
     <AppShell bare hideTopNav>

@@ -11,6 +11,7 @@ export type ChatMsg =
     timestamp: string;
     citations?: number[];
     isStreaming?: boolean;
+    isLoading?: boolean;
   };
 
 interface ChatMessagesProps {
@@ -63,6 +64,9 @@ function renderAiContent(content: string) {
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
+
+  console.log("messages", messages)
+
   return (
     <div className="flex flex-col gap-8 py-8">
       {messages.map((msg) => {
@@ -99,7 +103,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
                 <span className="text-on-surface-variant">Converse AI</span>
                 <span className="opacity-40">•</span>
                 <span>{msg.timestamp}</span>
-                {msg.isStreaming && (
+                {msg.isLoading && (
                   <>
                     <span className="opacity-40">•</span>
                     <span className="text-primary inline-flex items-center gap-1">
@@ -111,7 +115,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
               </div>
               <div className="glass-panel rounded-2xl rounded-tl-md px-5 py-4 border border-outline-variant/10">
                 {msg.content ? renderAiContent(msg.content) : null}
-                {msg.isStreaming && !msg.content && (
+                {msg.isLoading && !msg.content && (
                   <span className="typing-indicator inline-flex align-middle">
                     <span />
                     <span />

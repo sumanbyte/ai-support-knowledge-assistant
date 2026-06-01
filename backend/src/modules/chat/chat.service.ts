@@ -78,7 +78,8 @@ export class ChatService {
       data: {
         content: response,
         role: ChatMessageRole.ASSISTANT,
-        chatId
+        chatId: chatId ?? newChatId?.id,
+
       }
     })
 
