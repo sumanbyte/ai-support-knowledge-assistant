@@ -8,6 +8,7 @@ import { UpdateDocumentDto } from './dto/update-document.dto';
 import { User } from '@/generated/prisma/client';
 import { PrismaService } from '../auth/prisma/prisma.service';
 import { DocumentDto, DocumentResponseDto, DocumentStatus } from './dto/document-response.dto';
+import { LoggerGateway } from '../logger/logger.gateway';
 
 export interface ProcessDocumentInput {
   documentId: string;
@@ -25,6 +26,7 @@ export class DocumentsService {
     private readonly embeddingService: EmbeddingsService,
     private readonly vectorService: VectorService,
     private readonly prismaService: PrismaService,
+    private readonly loggerGateway: LoggerGateway
   ) { }
 
   create(_createDocumentDto: CreateDocumentDto) {
@@ -67,21 +69,22 @@ export class DocumentsService {
         throw new BadRequestException('Document buffer is empty');
       }
 
-      console.log('Processing document:', fileName ?? publicId ?? 'unknown');
-      if (cloudinaryUrl) {
-        console.log('Cloudinary URL:', cloudinaryUrl);
-      }
+      this.loggerGateway.sendLog(userId, 'info', `Processing document: ${fileName ?? publicId ?? 'unknown'}`);
+
 
       // Clear any prior chunks for this document (retries / re-process).
       await this.vectorService.deleteVectorEmbeddings(documentId, userId);
+      this.loggerGateway.sendLog(userId, 'info', `Deleted prior chunks for document: ${documentId}`);
 
       const parser = new PDFParse({ data: buffer });
       const pdfData = await parser.getText();
       const numberOfPages = pdfData.pages.length;
-
+      this.loggerGateway.sendLog(userId, 'info', `Number of pages: ${numberOfPages}`);
       const chunks = this.chunkingService.chunkText(pdfData.text);
+      this.loggerGateway.sendLog(userId, 'info', `Number of chunks: ${chunks.length}`);
       const embeddings = await this.embeddingService.generateEmbeddings(chunks);
-      const savedEmbeddings = await this.vectorService.saveVectorEmbeddings(
+      this.loggerGateway.sendLog(userId, 'info', `Number of embeddings: ${embeddings.length}`);
+      await this.vectorService.saveVectorEmbeddings(
         chunks,
         embeddings,
         documentId,
@@ -91,6 +94,7 @@ export class DocumentsService {
         numberOfPages
       );
 
+      this.loggerGateway.sendLog(userId, 'info', `Document updated: ${documentId}`);
       await this.prismaService.document.update({
         where: { id: documentId },
         data: {
@@ -99,7 +103,7 @@ export class DocumentsService {
         },
       })
 
-
+      this.loggerGateway.sendLog(userId, 'success', `Document processed successfully: ${documentId}`);
       return {
         message: 'Document processed.',
         chunks: chunks.length,

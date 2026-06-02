@@ -72,7 +72,9 @@ function ChatHistoryContent({ activeChatId }: { activeChatId?: string }) {
 
   const [chats, setChats] = useState<PaginatedChatDto['data']>([]);
 
-  const { data: chatHistory, execute: getChatHistory, loading, error } = useApi<PaginatedChatDto, []>(() => chatService.getChatHistory());
+  const { data: chatHistory, execute: getChatHistory, loading, error } = useApi<PaginatedChatDto, []>(() =>
+    chatService.getChatHistory(1, 20),
+  );
 
   useError(error);
 

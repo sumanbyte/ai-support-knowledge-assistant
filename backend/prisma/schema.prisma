@@ -37,15 +37,16 @@ enum DocumentIcon {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  name      String
-  password  String?
-  googleId  String?    @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  documents Document[]
-  chats     Chat[]
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String
+  password     String?
+  googleId     String?       @unique
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  documents    Document[]
+  chats        Chat[]
+  pipelineLogs PipelineLog[]
 }
 
 model Document {
@@ -110,4 +111,26 @@ model ChatMessage {
 
   @@index([chatId])
   @@map("chat_messages")
+}
+
+enum PipelineLogType {
+  info
+  success
+  warn
+  error
+  system
+}
+
+model PipelineLog {
+  id        String          @id @default(uuid())
+  timestamp DateTime        @default(now())
+  message   String
+  type      PipelineLogType
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([createdAt])
+  @@map("pipeline_logs")
 }

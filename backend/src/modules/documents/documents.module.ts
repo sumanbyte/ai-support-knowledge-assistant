@@ -5,9 +5,10 @@ import { ChunkingService } from '../chunking/chunking.service';
 import { EmbeddingsService } from '../embeddings/embeddings.service';
 import { VectorService } from '../vector/vector.service';
 import { PrismaService } from '../auth/prisma/prisma.service';
+import { LoggerGateway } from '../logger/logger.gateway';
 
 @Module({
   controllers: [DocumentsController],
-  providers: [DocumentsService, ChunkingService, EmbeddingsService, VectorService, PrismaService],
+  providers: [DocumentsService, ChunkingService, EmbeddingsService, VectorService, PrismaService, LoggerGateway],
 })
 export class DocumentsModule { }

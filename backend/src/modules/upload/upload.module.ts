@@ -10,6 +10,7 @@ import { UploadController } from './upload.controller';
 import { UploadService } from './upload.service';
 import { PrismaService } from '../auth/prisma/prisma.service';
 import { uploadFileFilter } from './upload-file.filter';
+import { LoggerGateway } from '../logger/logger.gateway';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { uploadFileFilter } from './upload-file.filter';
     EmbeddingsService,
     VectorService,
     PrismaService,
+    LoggerGateway,
   ],
 })
 export class UploadModule { }

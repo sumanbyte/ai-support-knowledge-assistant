@@ -134,38 +134,13 @@ export function KnowledgeBaseLoader() {
           <Skeleton key={i} className="h-8 w-20 rounded-full" />
         ))}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="glass-panel p-5 rounded-xl flex items-center gap-4">
-            <Skeleton className="w-12 h-12 rounded-lg shrink-0" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-3 w-24" />
-              <Skeleton className="h-7 w-16" />
-            </div>
-          </div>
-        ))}
-      </div>
       <div className="space-y-3">
-        {[0, 1, 2, 4].map((i) => (
+        {[0, 1, 2, 3].map((i) => (
           <div key={i} className="glass-panel rounded-xl p-5 space-y-3">
-            <div className="flex justify-between gap-4">
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-5 w-1/2" />
-                <Skeleton className="h-3 w-1/3" />
-              </div>
-              <Skeleton className="h-8 w-12" />
-            </div>
-            <Skeleton className="h-1.5 w-full rounded-full" />
+            <Skeleton className="h-5 w-1/2" />
+            <Skeleton className="h-3 w-1/3" />
           </div>
         ))}
-      </div>
-      <div className="glass-panel p-6 rounded-xl space-y-4">
-        <Skeleton className="h-5 w-48" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-20 rounded-lg" />
-          ))}
-        </div>
       </div>
       <LoadingSpinner message="Loading knowledge base..." size="sm" className="py-2" />
     </div>
