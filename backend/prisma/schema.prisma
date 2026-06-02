@@ -37,16 +37,17 @@ enum DocumentIcon {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  email        String        @unique
-  name         String
-  password     String?
-  googleId     String?       @unique
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  documents    Document[]
-  chats        Chat[]
-  pipelineLogs PipelineLog[]
+  id               String             @id @default(uuid())
+  email            String             @unique
+  name             String
+  password         String?
+  googleId         String?            @unique
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  documents        Document[]
+  chats            Chat[]
+  pipelineLogs     PipelineLog[]
+  retrievalMetrics RetrievalMetrics[]
 }
 
 model Document {
@@ -80,6 +81,18 @@ model RagMetrics {
 
   @@index([createdAt])
   @@map("rag_metrics")
+}
+
+model RetrievalMetrics {
+  id        String   @id @default(uuid())
+  score     Float
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, score])
+  @@map("retrieval_metrics")
 }
 
 enum ChatMessageRole {

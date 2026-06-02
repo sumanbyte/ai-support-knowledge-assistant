@@ -16,6 +16,7 @@ export type ChatMsg =
 
 interface ChatMessagesProps {
   messages: ChatMsg[];
+  topSlot?: React.ReactNode;
 }
 
 function renderInline(text: string) {
@@ -63,10 +64,11 @@ function renderAiContent(content: string) {
   return <div className="text-on-surface text-[15px] leading-relaxed space-y-3">{items}</div>;
 }
 
-export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
+export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, topSlot }) => {
 
   return (
     <div className="flex flex-col gap-8 py-8">
+      {topSlot}
       {messages.map((msg) => {
         if (msg.type === 'separator') {
           return (

@@ -19,6 +19,23 @@ export const authService = {
   logout: (): Promise<{ ok: boolean }> =>
     axiosInstance.post('/auth/logout') as Promise<{ ok: boolean }>,
 
+  updateProfile: (data: { name: string }): Promise<AuthUserDto> =>
+    axiosInstance.patch('/auth/me/profile', data) as Promise<AuthUserDto>,
+
+  resetWorkspace: (): Promise<{
+    success: boolean;
+    message: string;
+    deletedDocuments: number;
+    deletedChats: number;
+    deletedPipelineLogs: number;
+  }> => axiosInstance.post('/auth/me/reset-workspace') as Promise<{
+    success: boolean;
+    message: string;
+    deletedDocuments: number;
+    deletedChats: number;
+    deletedPipelineLogs: number;
+  }>,
+
   /** Server-side Passport redirect flow (see GET /auth/google on the API). */
   startGoogleLogin: (): void => {
     const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';

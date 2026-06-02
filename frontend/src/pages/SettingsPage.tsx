@@ -1,25 +1,77 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
+import { DeleteModal } from '../components/modals/DeleteModal';
+import { useAuth } from '../context/AuthContext';
+import { useApi } from '../hooks/useApi';
+import { useError } from '../hooks/useError';
+import { authService } from '../services/authService';
+import { toast } from '../components/toast';
+
 export const SettingsPage: React.FC = () => {
-  const [workspaceName, setWorkspaceName] = useState('Acme Corp Enterprise');
-  const [ragEnabled, setRagEnabled] = useState(true);
-  const [streamingEnabled, setStreamingEnabled] = useState(true);
+  const navigate = useNavigate();
+  const { user, setUser } = useAuth();
+  const [workspaceName, setWorkspaceName] = useState(user?.name ?? '');
+
+  const {
+    execute: saveProfile,
+    loading: saving,
+    error: saveError,
+  } = useApi(authService.updateProfile);
+
+  const {
+    execute: resetWorkspace,
+    loading: resetting,
+    error: resetError,
+  } = useApi(authService.resetWorkspace);
+
+  useError(saveError);
+  useError(resetError);
+
+  useEffect(() => {
+    if (user?.name) {
+      setWorkspaceName(user.name);
+    }
+  }, [user?.name]);
+
+  const handleSave = async () => {
+    const trimmed = workspaceName.trim();
+    if (!trimmed) {
+      toast.error('Workspace name cannot be empty.');
+      return;
+    }
+    const updated = await saveProfile({ name: trimmed });
+    if (updated) {
+      setUser(updated);
+      toast.success('Workspace settings saved.');
+    }
+  };
+
+  const handleResetWorkspace = async () => {
+    const result = await resetWorkspace();
+    if (result?.success) {
+      toast.success(result.message);
+      navigate('/dashboard');
+    }
+  };
 
   return (
     <AppShell
       header={
         <PageHeader
           title="Workspace Settings & Administration"
-          subtitle="Integrations, AI configuration, and workspace policies."
+          subtitle="Manage your workspace identity and data."
           actions={
             <button
               type="button"
-              className="bg-primary text-on-primary px-4 py-2 rounded-lg font-semibold shadow-[0_0_15px_rgba(221,183,255,0.2)]"
+              onClick={handleSave}
+              disabled={saving || !workspaceName.trim()}
+              className="bg-primary text-on-primary px-4 py-2 rounded-lg font-semibold shadow-[0_0_15px_rgba(221,183,255,0.2)] disabled:opacity-50"
             >
-              Save Changes
+              {saving ? 'Saving...' : 'Save Changes'}
             </button>
           }
         />
@@ -39,54 +91,13 @@ export const SettingsPage: React.FC = () => {
               className="w-full glass-overlay rounded-lg px-4 py-2.5 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/50"
             />
           </label>
+          <p className="text-sm text-on-surface-variant/70 mb-3">
+            Uses the same display name as your profile ({user?.email ?? '—'}).
+          </p>
           <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/15 text-primary text-sm font-medium border border-primary/25">
             Enterprise Pro
           </span>
         </section>
-
-        {/* <section className="glass-panel p-6 rounded-xl space-y-5">
-          <h3 className="text-headline-md text-on-surface font-medium flex items-center gap-2">
-            <Icon name="psychology" className="text-primary" />
-            AI & RAG
-          </h3>
-          {[
-            {
-              label: 'RAG retrieval',
-              desc: 'Ground responses in indexed documents',
-              checked: ragEnabled,
-              onChange: setRagEnabled,
-            },
-            {
-              label: 'Streaming responses',
-              desc: 'Show tokens as they generate',
-              checked: streamingEnabled,
-              onChange: setStreamingEnabled,
-            },
-          ].map((item) => (
-            <label
-              key={item.label}
-              className="flex items-center justify-between gap-4 cursor-pointer p-3 rounded-lg hover:bg-surface-container-high/30 transition-colors"
-            >
-              <div>
-                <p className="text-on-surface font-medium">{item.label}</p>
-                <p className="text-on-surface-variant text-sm">{item.desc}</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={item.checked}
-                onChange={(e) => item.onChange(e.target.checked)}
-                className="w-5 h-5 accent-[#b76dff] rounded"
-              />
-            </label>
-          ))}
-          <label className="block">
-            <span className="font-label-sm text-on-surface-variant block mb-2">Vector namespace</span>
-            <input
-              defaultValue="sales-q3"
-              className="w-full glass-overlay rounded-lg px-4 py-2.5 text-on-surface font-mono text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
-            />
-          </label>
-        </section> */}
 
         <section className="glass-panel p-7 rounded-xl">
           <h3 className="text-headline-md text-on-surface font-medium mb-4 flex items-center gap-2">
@@ -118,11 +129,30 @@ export const SettingsPage: React.FC = () => {
         <section className="glass-panel p-6 rounded-xl border border-error/20">
           <h3 className="text-headline-md text-error font-medium mb-2">Danger zone</h3>
           <p className="text-on-surface-variant text-sm mb-4">
-            Permanently delete workspace data and vector indexes.
+            Permanently delete all documents, chat history, vector indexes, and pipeline logs.
+            Your account stays active but the dashboard starts fresh.
           </p>
-          <button type="button" className="text-error hover:underline text-sm font-medium">
-            Delete workspace
-          </button>
+          <DeleteModal
+            dialogId="settings-reset-workspace-dialog"
+            title="Reset workspace?"
+            description={
+              <>
+                This will permanently delete all your documents, chats, and indexing logs.
+                Vector embeddings and uploaded files will be removed. This cannot be undone.
+              </>
+            }
+            confirmLabel={resetting ? 'Resetting...' : 'Reset workspace'}
+            onConfirm={handleResetWorkspace}
+            trigger={
+              <button
+                type="button"
+                disabled={resetting}
+                className="text-error hover:underline text-sm font-medium disabled:opacity-50"
+              >
+                Reset workspace data
+              </button>
+            }
+          />
         </section>
       </PageContent>
     </AppShell>

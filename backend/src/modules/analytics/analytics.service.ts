@@ -31,7 +31,8 @@ export class AnalyticsService {
   }
 
   async getDocumentsAnalytics(userId: string) {
-    const [totalDocuments, indexSize, indexInfo, uptimePercentage, averageQueryLatency] = await Promise.all([
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const [totalDocuments, indexSize, indexInfo, uptimePercentage, averageQueryLatency, averageRelevanceScore] = await Promise.all([
       this.prismaService.document.count({
         where: { userId }
       }),
@@ -43,15 +44,19 @@ export class AnalyticsService {
       }),
       this.vectorService.getIndexInfo(),
       this.vectorService.getUptimePercentage(),
-      this.vectorService.getAverageQueryLatency()
+      this.vectorService.getAverageQueryLatency(),
+      this.prismaService.retrievalMetrics.aggregate({
+        where: { userId, createdAt: { gte: thirtyDaysAgo } },
+        _avg: { score: true }
+      })
     ])
 
-    const averageRelevanceScore = 0
+
 
     return {
       totalDocuments,
       indexSize: indexSize._sum.size,
-      averageRelevanceScore,
+      averageRelevanceScore: (averageRelevanceScore._avg.score ? parseFloat(averageRelevanceScore._avg.score.toFixed(2)) * 100 : 0),
       dimension: indexInfo.dimension,
       namespaces: Object.keys(indexInfo.namespaces).length,
       uptimePercentage: uptimePercentage.toFixed(0),

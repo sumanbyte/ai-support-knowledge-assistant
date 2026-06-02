@@ -7,5 +7,6 @@ import { AppConfig } from 'src/config/app.config';
 @Module({
   controllers: [VectorController],
   providers: [VectorService, PrismaService, AppConfig],
+  exports: [VectorService],
 })
 export class VectorModule { }

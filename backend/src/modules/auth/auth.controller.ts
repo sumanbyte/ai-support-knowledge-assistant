@@ -28,11 +28,14 @@ import { LoginDto } from './dto/login.dto';
 import { AuthUserDto } from './dto/auth-user.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ResetWorkspaceResponseDto } from './dto/reset-workspace-response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth-guard';
 import { GetUser } from './decorators/current-user.decorator';
 import type { Request, Response } from 'express';
 import { AppConfig } from '@/src/config/app.config';
+import { User } from '@/generated/prisma/client';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -49,6 +52,7 @@ export class AuthController {
   signup(@Body() signupDto: SignupDto) {
     return this.authService.register(signupDto);
   }
+
 
   @UseGuards(AuthGuard('local'))
   @Post('login')
@@ -102,6 +106,30 @@ export class AuthController {
   @ApiUnauthorizedResponse()
   getMe(@GetUser() user: AuthUserDto) {
     return user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/profile')
+  @ApiOperation({ summary: 'Update current user display name' })
+  @ApiOkResponse({ type: AuthUserDto })
+  @ApiUnauthorizedResponse()
+  updateProfile(
+    @GetUser() user: Omit<User, 'password'>,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return this.authService.updateProfile(user.id, dto.name);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('me/reset-workspace')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Permanently delete all documents, chats, and pipeline logs for the current user',
+  })
+  @ApiOkResponse({ type: ResetWorkspaceResponseDto })
+  @ApiUnauthorizedResponse()
+  resetWorkspace(@GetUser() user: Omit<User, 'password'>) {
+    return this.authService.resetWorkspace(user.id);
   }
 
   @Post('refresh')

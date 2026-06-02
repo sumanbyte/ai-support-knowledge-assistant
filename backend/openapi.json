@@ -465,6 +465,117 @@
         ]
       }
     },
+    "/vector": {
+      "post": {
+        "operationId": "VectorController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVectorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Vector"
+        ]
+      },
+      "get": {
+        "operationId": "VectorController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Vector"
+        ]
+      }
+    },
+    "/vector/{id}": {
+      "get": {
+        "operationId": "VectorController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Vector"
+        ]
+      },
+      "patch": {
+        "operationId": "VectorController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVectorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Vector"
+        ]
+      },
+      "delete": {
+        "operationId": "VectorController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Vector"
+        ]
+      }
+    },
     "/auth/signup": {
       "post": {
         "operationId": "AuthController_signup",
@@ -585,6 +696,66 @@
           }
         },
         "summary": "Get current user from access token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me/profile": {
+      "patch": {
+        "operationId": "AuthController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          }
+        },
+        "summary": "Update current user display name",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me/reset-workspace": {
+      "post": {
+        "operationId": "AuthController_resetWorkspace",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetWorkspaceResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": ""
+          }
+        },
+        "summary": "Permanently delete all documents, chats, and pipeline logs for the current user",
         "tags": [
           "auth"
         ]
@@ -736,6 +907,20 @@
         "responses": {
           "201": {
             "description": ""
+          }
+        },
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/logs/history": {
+      "get": {
+        "operationId": "DocumentsController_getLogsHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Pipeline logs history"
           }
         },
         "tags": [
@@ -1354,6 +1539,14 @@
         "type": "object",
         "properties": {}
       },
+      "CreateVectorDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateVectorDto": {
+        "type": "object",
+        "properties": {}
+      },
       "SignupDto": {
         "type": "object",
         "properties": {
@@ -1428,6 +1621,46 @@
         },
         "required": [
           "user"
+        ]
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Jane Doe",
+            "description": "Display / workspace name"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ResetWorkspaceResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "deletedDocuments": {
+            "type": "number"
+          },
+          "deletedChats": {
+            "type": "number"
+          },
+          "deletedPipelineLogs": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "deletedDocuments",
+          "deletedChats",
+          "deletedPipelineLogs"
         ]
       },
       "RefreshResponseDto": {

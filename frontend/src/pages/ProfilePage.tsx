@@ -1,22 +1,48 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppShell } from '../components/Layout';
 import { PageHeader } from '../components/Layout/PageHeader';
 import { PageContent } from '../components/Layout/PageContent';
 import { Icon } from '../components/UI/Icon';
 import { useAppNavigate } from '../hooks/useAppNavigate';
+import { useAuth } from '../context/AuthContext';
+import { useApi } from '../hooks/useApi';
+import { useError } from '../hooks/useError';
+import { authService } from '../services/authService';
+import { toast } from '../components/toast';
 
 export const ProfilePage: React.FC = () => {
   const navigate = useAppNavigate();
-  const [name, setName] = useState('Alex Chen');
-  const [email, setEmail] = useState('alex.chen@acme.com');
-  const [notifications, setNotifications] = useState(true);
+  const { user, setUser } = useAuth();
+  const [name, setName] = useState(user?.name ?? '');
+
+  const { execute: saveProfile, loading: saving, error } = useApi(authService.updateProfile);
+  useError(error);
+
+  useEffect(() => {
+    if (user?.name) {
+      setName(user.name);
+    }
+  }, [user?.name]);
+
+  const handleSave = async () => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      toast.error('Display name cannot be empty.');
+      return;
+    }
+    const updated = await saveProfile({ name: trimmed });
+    if (updated) {
+      setUser(updated);
+      toast.success('Profile updated.');
+    }
+  };
 
   return (
     <AppShell
       header={
         <PageHeader
-          title="User Profile & Preferences"
-          subtitle="Account settings and notification preferences."
+          title="User Profile"
+          subtitle="Your account details."
           actions={
             <button
               type="button"
@@ -37,11 +63,10 @@ export const ProfilePage: React.FC = () => {
               <Icon name="person" size={48} className="text-primary" />
             </div>
             <div>
-              <h2 className="text-headline-lg text-on-surface font-semibold">{name}</h2>
-              <span className="inline-block mt-1 text-xs font-mono px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/25">
-                Admin
-              </span>
-              <p className="text-on-surface-variant mt-2">{email}</p>
+              <h2 className="text-headline-lg text-on-surface font-semibold">
+                {user?.name ?? '—'}
+              </h2>
+              <p className="text-on-surface-variant mt-2">{user?.email ?? '—'}</p>
             </div>
           </div>
         </div>
@@ -58,43 +83,21 @@ export const ProfilePage: React.FC = () => {
           <label className="block">
             <span className="font-label-sm text-on-surface-variant block mb-2">Email</span>
             <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full glass-overlay rounded-lg px-4 py-2.5 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/50"
+              value={user?.email ?? ''}
+              readOnly
+              className="w-full glass-overlay rounded-lg px-4 py-2.5 text-on-surface-variant cursor-not-allowed opacity-80"
             />
-          </label>
-        </div>
-
-        <div className="glass-panel p-6 rounded-xl">
-          <h3 className="text-headline-md text-on-surface font-medium mb-4">Preferences</h3>
-          <label className="flex items-center justify-between gap-4 cursor-pointer p-3 rounded-lg hover:bg-surface-container-high/30">
-            <div>
-              <p className="text-on-surface font-medium">Email notifications</p>
-              <p className="text-on-surface-variant text-sm">Pipeline and indexing alerts</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={notifications}
-              onChange={(e) => setNotifications(e.target.checked)}
-              className="w-5 h-5 accent-[#b76dff]"
-            />
-          </label>
-          <label className="block mt-4">
-            <span className="font-label-sm text-on-surface-variant block mb-2">Default landing page</span>
-            <select className="w-full glass-overlay rounded-lg px-4 py-2.5 text-on-surface bg-transparent focus:outline-none focus:ring-1 focus:ring-primary/50">
-              <option>Mission Control</option>
-              <option>AI Chat</option>
-              <option>Document Library</option>
-            </select>
           </label>
         </div>
 
         <div className="flex gap-3">
           <button
             type="button"
-            className="bg-primary text-on-primary px-5 py-2.5 rounded-lg font-semibold shadow-[0_0_15px_rgba(221,183,255,0.2)]"
+            onClick={handleSave}
+            disabled={saving || !name.trim()}
+            className="bg-primary text-on-primary px-5 py-2.5 rounded-lg font-semibold shadow-[0_0_15px_rgba(221,183,255,0.2)] disabled:opacity-50"
           >
-            Save profile
+            {saving ? 'Saving...' : 'Save profile'}
           </button>
           <button
             type="button"

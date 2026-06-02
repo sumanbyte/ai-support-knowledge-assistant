@@ -186,4 +186,17 @@ export class AuthService {
     return { ok: true };
   }
 
+  async updateProfile(userId: string, name: string) {
+    const updated = await this.userService.updateName(userId, name);
+    return {
+      id: updated.id,
+      email: updated.email,
+      name: updated.name,
+    };
+  }
+
+  async resetWorkspace(userId: string) {
+    return this.userService.resetWorkspace(userId);
+  }
+
 }

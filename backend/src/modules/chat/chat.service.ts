@@ -50,6 +50,8 @@ export class ChatService {
 
     const response = await this.ragService.generateResponse(contextText)
 
+
+
     let newChatId;
     if (!chatId) {
       newChatId = await this.prismaService.chat.create({
@@ -81,6 +83,13 @@ export class ChatService {
         role: ChatMessageRole.ASSISTANT,
         chatId: chatId ?? newChatId?.id,
 
+      }
+    })
+
+    await this.prismaService.retrievalMetrics.create({
+      data: {
+        score: contextChunks.reduce((acc, chunk) => acc + chunk.score, 0) / contextChunks.length,
+        userId,
       }
     })
 
@@ -154,7 +163,7 @@ export class ChatService {
         },
         skip: paginationQuery.skip,
         take: paginationQuery.limit,
-        orderBy: { createdAt: 'asc' },
+        orderBy: { createdAt: 'desc' },
       }),
       this.prismaService.chatMessage.count({
         where: {
