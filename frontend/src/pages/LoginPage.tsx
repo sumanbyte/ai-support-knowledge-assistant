@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { AuthDivider } from '../components/auth/AuthDivider';
 import { AuthField } from '../components/auth/AuthField';
 import { AuthLayout } from '../components/auth/AuthLayout';
-import { CONVERSE_LOGO_URL } from '../components/auth/constants';
 import { GoogleIcon } from '../components/auth/GoogleIcon';
 import { toast } from '../components/toast';
 import { Icon } from '../components/UI/Icon';

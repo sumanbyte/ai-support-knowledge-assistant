@@ -6,27 +6,15 @@ import { Icon } from '../components/UI/Icon';
 import { DocumentGridSkeleton } from '../components/UI/Loading';
 import { useApi } from '../hooks/useApi';
 import { documentService } from '../services/documentService';
-import type { DeleteResponseDto, DocumentDto, DocumentIcon, DocumentResponseDto, DocumentStatus, UploadResponseDto } from '../api';
+import type { DeleteResponseDto, DocumentDto, DocumentResponseDto, DocumentStatus, UploadResponseDto } from '../api';
 import { uploadService } from '../services/uploadService';
 import { toast } from 'sonner';
 import { useError } from '../hooks/useError';
 import { useLoading } from '../hooks/useLoading';
-import type { GenericResponse } from '../types/types';
 import { DeleteModal } from '../components/modals/DeleteModal';
 import { formatRelativeTime } from '../utils/format-time';
 
 type ViewMode = 'grid' | 'list';
-
-
-
-const ICON_TO_MATERIAL: Record<DocumentIcon, string> = {
-  PICTURE_AS_PDF: 'picture_as_pdf',
-  DESCRIPTION: 'description',
-  MARKDOWN: 'markdown',
-  CODE: 'code',
-  SLIDESHOW: 'slideshow',
-  YAML: 'data_object',
-};
 
 function toLibraryDocument(
   doc: DocumentResponseDto['documents'][number],

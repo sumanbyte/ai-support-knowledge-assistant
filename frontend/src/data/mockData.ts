@@ -1,5 +1,3 @@
-import type { DocumentDto } from "../api";
-
 export const RECENT_CHATS = [
   {
     id: '1',
