@@ -7,6 +7,11 @@ export class RefreshResponseDto {
   })
   accessToken: string;
 
+  @ApiProperty({
+    description: 'New refresh token (also set as HttpOnly cookie)',
+  })
+  refreshToken: string;
+
   @ApiProperty({ type: AuthUserDto })
   user: AuthUserDto;
 }

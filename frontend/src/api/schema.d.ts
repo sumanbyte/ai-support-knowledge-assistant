@@ -598,12 +598,22 @@ export interface components {
             password: string;
         };
         LoginResponseDto: {
+            /** @description Access JWT (also set as HttpOnly cookie when cookies work) */
+            accessToken: string;
+            /** @description Refresh JWT (also set as HttpOnly cookie when cookies work) */
+            refreshToken: string;
             user: components["schemas"]["AuthUserDto"];
         };
         RefreshResponseDto: {
             /** @description New access token (also set as HttpOnly cookie) */
             accessToken: string;
+            /** @description New refresh token (also set as HttpOnly cookie) */
+            refreshToken: string;
             user: components["schemas"]["AuthUserDto"];
+        };
+        RefreshTokenDto: {
+            /** @description Refresh JWT when HttpOnly cookie is unavailable */
+            refreshToken?: string;
         };
         UpdateAuthDto: Record<string, never>;
         CreateDocumentDto: Record<string, never>;

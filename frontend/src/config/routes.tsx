@@ -13,6 +13,7 @@ import {
   SettingsPage,
   SignupPage,
 } from '../pages';
+import AuthCallbackPage from '../pages/AuthCallbackPage';
 import ProtectedRoute from '../components/Layout/ProtectedRoute';
 import { protectedRouteLoader } from '../loaders/protectedRoute.loader';
 
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/login" replace /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'signup', element: <SignupPage /> },
+      { path: 'auth/callback', element: <AuthCallbackPage /> },
       {
         // Same pattern as loader on /dashboard — one loader guards all protected children
         element: <ProtectedRoute />,

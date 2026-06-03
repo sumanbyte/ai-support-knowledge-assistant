@@ -118,8 +118,12 @@ export class AuthService {
     };
   }
 
-  async refreshToken(req: Request, res: Response) {
-    const refreshToken = req.cookies?.refresh_token;
+  async refreshToken(
+    req: Request,
+    res: Response,
+    bodyRefreshToken?: string,
+  ) {
+    const refreshToken = req.cookies?.refresh_token ?? bodyRefreshToken;
     if (!refreshToken) {
       throw new UnauthorizedException('Missing refresh token');
     }
@@ -154,7 +158,7 @@ export class AuthService {
       this.appConfig.getCookieOptions('access'),
     );
 
-    return { accessToken, user: safeUser };
+    return { accessToken, refreshToken: newRefreshToken, user: safeUser };
   }
 
   async login(
@@ -175,7 +179,7 @@ export class AuthService {
       this.appConfig.getCookieOptions('access'),
     );
 
-    return { user: safeUser };
+    return { accessToken, refreshToken, user: safeUser };
   }
 
   logout(res: Response) {

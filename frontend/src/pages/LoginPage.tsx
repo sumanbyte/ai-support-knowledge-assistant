@@ -11,6 +11,7 @@ import { useError } from '../hooks/useError';
 import { useAppNavigate } from '../hooks/useAppNavigate';
 import { useAuth } from '../context/AuthContext';
 import type { LoginDto } from '../api';
+import { tokenStore } from '../config/token-store';
 
 export const LoginPage: React.FC = () => {
   const navigate = useAppNavigate();
@@ -25,7 +26,10 @@ export const LoginPage: React.FC = () => {
 
   useEffect(() => {
     if (!data) return;
-    setUser(data.user)
+    if (data.accessToken && data.refreshToken) {
+      tokenStore.setTokens(data.accessToken, data.refreshToken);
+    }
+    setUser(data.user);
     toast.success('Welcome back.', {
       description: 'Redirecting to Mission Control.',
     });

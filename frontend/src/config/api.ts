@@ -9,7 +9,7 @@ export const axiosInstance = axios.create({
 
 
 axiosInstance.interceptors.request.use((config) => {
-    const token = tokenStore.getToken();
+    const token = tokenStore.getAccessToken();
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -45,8 +45,6 @@ axiosInstance.interceptors.response.use(
             !originalRequest.url?.includes("/auth/login") &&
             !originalRequest.url?.includes("/auth/logout")
         ) {
-            console.log("isRefreshing", error.response);
-
             if (isRefreshing) {
                 // Queue parallel requests while token is being fetched
                 return new Promise((resolve, reject) => {
@@ -63,24 +61,26 @@ axiosInstance.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                // Hit the refresh endpoint. Browser submits HttpOnly cookie automatically
-                const response = await axios.post(
+                const storedRefresh = tokenStore.getRefreshToken();
+                const response = await axios.post<{
+                    accessToken: string;
+                    refreshToken: string;
+                }>(
                     `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
-                    {},
+                    storedRefresh ? { refreshToken: storedRefresh } : {},
                     { withCredentials: true }
                 );
 
-                const { accessToken } = response.data;
-                tokenStore.setToken(accessToken);
+                const { accessToken, refreshToken } = response.data;
+                tokenStore.setTokens(accessToken, refreshToken);
 
                 processQueue(null, accessToken);
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
-                return axiosInstance(originalRequest); // Retry the initial failed request
+                return axiosInstance(originalRequest);
             } catch (refreshError) {
                 processQueue(refreshError, null);
-                tokenStore.clearToken();
-                // Redirect user to login or clear global context state here
+                tokenStore.clearTokens();
                 return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;

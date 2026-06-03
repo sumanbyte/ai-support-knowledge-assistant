@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch {
       // Clear local session even if the request fails
     } finally {
-      tokenStore.clearToken();
+      tokenStore.clearTokens();
       setUser(null);
     }
   }, []);

@@ -28,6 +28,7 @@ import { LoginDto } from './dto/login.dto';
 import { AuthUserDto } from './dto/auth-user.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ResetWorkspaceResponseDto } from './dto/reset-workspace-response.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -60,7 +61,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Sign in with email and password' })
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({
-    description: 'Sets access_token and refresh_token cookies',
+    description:
+      'Returns tokens in body and sets access_token / refresh_token HttpOnly cookies',
     type: LoginResponseDto,
   })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
@@ -91,7 +93,13 @@ export class AuthController {
         await this.authService.validateGoogleUser(user);
       res.cookie('refresh_token', refreshToken, this.appConfig.getCookieOptions('refresh'));
       res.cookie('access_token', accessToken, this.appConfig.getCookieOptions('access'));
-      return res.redirect(`${this.appConfig.getEnvConfig().FRONTEND_URL}/dashboard`);
+
+      const frontend = this.appConfig.getEnvConfig().FRONTEND_URL;
+      const hash = new URLSearchParams({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      }).toString();
+      return res.redirect(`${frontend}/auth/callback#${hash}`);
     } catch {
       return res.redirect(
         `${this.appConfig.getEnvConfig().FRONTEND_URL}/login?error=google_failed`,
@@ -134,7 +142,11 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Refresh access token using refresh_token cookie' })
+  @ApiOperation({
+    summary:
+      'Refresh access token using refresh_token cookie or body refreshToken',
+  })
+  @ApiBody({ type: RefreshTokenDto, required: false })
   @ApiOkResponse({
     description: 'Issues new tokens (also set as HttpOnly cookies)',
     type: RefreshResponseDto,
@@ -143,8 +155,9 @@ export class AuthController {
   refreshToken(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
+    @Body() body?: RefreshTokenDto,
   ) {
-    return this.authService.refreshToken(req, res);
+    return this.authService.refreshToken(req, res, body?.refreshToken);
   }
 
   @Post('logout')

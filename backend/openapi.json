@@ -1615,13 +1615,32 @@
       "LoginResponseDto": {
         "type": "object",
         "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Access JWT (also set as HttpOnly cookie when cookies work)"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh JWT (also set as HttpOnly cookie when cookies work)"
+          },
           "user": {
             "$ref": "#/components/schemas/AuthUserDto"
           }
         },
         "required": [
+          "accessToken",
+          "refreshToken",
           "user"
         ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh JWT when HttpOnly cookie is unavailable (e.g. cross-site browsers)"
+          }
+        }
       },
       "UpdateProfileDto": {
         "type": "object",
@@ -1670,12 +1689,17 @@
             "type": "string",
             "description": "New access token (also set as HttpOnly cookie)"
           },
+          "refreshToken": {
+            "type": "string",
+            "description": "New refresh token (also set as HttpOnly cookie)"
+          },
           "user": {
             "$ref": "#/components/schemas/AuthUserDto"
           }
         },
         "required": [
           "accessToken",
+          "refreshToken",
           "user"
         ]
       },
